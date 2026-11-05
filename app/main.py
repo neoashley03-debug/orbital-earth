@@ -58,7 +58,7 @@ async def fetch_json(url: str, *, params: dict[str, Any] | None = None,
     return payload
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 async def home() -> HTMLResponse:
     index = STATIC_DIR / "index.html"
     return HTMLResponse(index.read_text(encoding="utf-8"))
