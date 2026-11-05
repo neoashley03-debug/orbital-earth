@@ -40,7 +40,7 @@
   <section class="section">
     <div class="eyebrow">Geospatial layers</div><h2>Map intelligence</h2>
     <label class="layer"><input type="checkbox" id="earthquakesToggle" checked> Earthquakes <small>USGS</small></label>
-    <label class="layer"><input type="checkbox" id="placesToggle"> Nearby amenities <small>OSM</small></label>
+    <label class="layer"><input type="checkbox" id="placesToggle" checked> Surrounding places <small>OSM</small></label>
     <label class="layer"><input type="checkbox" id="weatherToggle"> Weather at centre <small>Open-Meteo</small></label>
     <label class="layer"><input type="checkbox" id="airToggle"> Air quality at centre <small>Open-Meteo</small></label>
   </section>
@@ -66,10 +66,9 @@
       </label>
       <label style="display:block">Display quality
         <select id="qualitySelect">
-          <option value="auto">Auto</option>
-          <option value="hd">HD render</option>
-          <option value="4k">4K render</option>
-          <option value="8k">8K render</option>
+          <option value="auto">Adaptive</option>
+          <option value="hd">High detail render</option>
+          <option value="4k">Maximum render</option>
         </select>
       </label>
     </div>
@@ -87,9 +86,12 @@
       <button class="chip" data-zoom-height="15000000">Global</button>
       <button class="chip" data-zoom-height="2500000">Region</button>
       <button class="chip" data-zoom-height="250000">City</button>
-      <button class="chip" data-zoom-height="25000">Close</button>
+      <button class="chip" data-zoom-height="12000">Street</button>
+      <button class="chip" data-zoom-height="2500">Block</button>
+      <button class="chip" data-zoom-height="450">Site</button>
+      <button class="chip" data-zoom-height="120">Ultra</button>
     </div>
-    <div class="modehint" id="visualStatus">Satellite detail depends on the imagery provider and location. Display quality changes rendering only; it cannot create higher-resolution source imagery.</div>
+    <div class="modehint" id="visualStatus">Ultra zoom is enabled. Actual ground detail depends on the imagery coverage available at each location; zoom cannot invent missing pixels.</div>
   </section>
   <section class="section">
     <div class="eyebrow">Observation filters</div><h2>Earthquake activity</h2>
@@ -120,7 +122,7 @@
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  const state = { days: 1, minMag: 2.5, viewer: null, quakeLayer: null, placesLayer: null, selected: {lat: -25.746, lon: 28.188}, quakeData: [], loading: false };
+  const state = { days: 1, minMag: 2.5, viewer: null, quakeLayer: null, placesLayer: null, buildingsTileset: null, selected: {lat: -25.746, lon: 28.188}, quakeData: [], loading: false };
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const time = ms => ms ? new Date(ms).toLocaleString() : "—";
   const api = async (path) => { const r = await fetch(path, {headers: {"Accept":"application/json"}}); if (!r.ok) { let d={}; try{d=await r.json()}catch{} throw new Error(d.detail || ("HTTP "+r.status)); } return r.json(); };
@@ -149,6 +151,9 @@
     v.scene.globe.baseColor=Cesium.Color.fromCssColorString("#172b3a");
     v.scene.backgroundColor=Cesium.Color.fromCssColorString("#06101b");
     v.camera.setView({destination:Cesium.Cartesian3.fromDegrees(20,10,23500000)});
+    v.scene.screenSpaceCameraController.minimumZoomDistance=35;
+    v.scene.screenSpaceCameraController.maximumZoomDistance=30000000;
+    v.scene.globe.maximumScreenSpaceError=1.5;
     $("basemapStatus").textContent="BASEMAP: OPENSTREETMAP";
     // Upgrade to Esri World Imagery when the imagery service responds.
     try {
@@ -164,7 +169,10 @@
     }
     v.scene.requestRender();
     v.screenSpaceEventHandler.setInputAction(evt=>{
-      const p=v.camera.pickEllipsoid(evt.position,v.scene.globe.ellipsoid);
+      const picked=v.scene.pick(evt.position);
+      let p=null;
+      if(v.scene.pickPositionSupported && picked) { try { p=v.scene.pickPosition(evt.position); } catch(_) {} }
+      if(!p) p=v.camera.pickEllipsoid(evt.position,v.scene.globe.ellipsoid);
       if(!p)return;
       const point=Cesium.Cartographic.fromCartesian(p);
       const lat=Cesium.Math.toDegrees(point.latitude),lon=Cesium.Math.toDegrees(point.longitude);
@@ -199,11 +207,11 @@
   }
   function setQuality(name){
     if(!state.viewer)return;
-    const presets={auto:Math.min(window.devicePixelRatio||1,1.5),hd:1.25,"4k":1.5,"8k":1.75};
+    const presets={auto:Math.min(window.devicePixelRatio||1,1.5),hd:1.35,"4k":1.65};
     const scale=presets[name]||1;
     state.viewer.resolutionScale=scale;
     state.viewer.scene.requestRender();
-    $("visualStatus").textContent=name.toUpperCase()+" display preset applied at "+scale+"× render scale. This does not increase the source imagery resolution; actual detail depends on the provider and device.";
+    $("visualStatus").textContent=name.toUpperCase()+" rendering set to "+scale+"×. This improves on-screen rendering only; source imagery resolution remains provider-dependent.";
   }
   async function setTerrain(enabled){
     if(!state.viewer)return;
@@ -228,8 +236,26 @@
     }
   }
   async function loadClientConfig(){
-    try{const c=await api("/api/client-config");ionToken=c.cesium_ion_token||"";if(ionToken)$("terrainButton").textContent="⛰ Terrain: ready";}
-    catch(e){$("terrainButton").textContent="⛰ Terrain: needs key";}
+    try{
+      const c=await api("/api/client-config");
+      ionToken=c.cesium_ion_token||"";
+      if(ionToken){
+        Cesium.Ion.defaultAccessToken=ionToken;
+        $("terrainButton").textContent="⛰ Terrain: ready";
+        await setTerrain(true);
+        try{
+          state.buildingsTileset=await Cesium.Cesium3DTileset.fromIonAssetId(96188);
+          state.viewer.scene.primitives.add(state.buildingsTileset);
+          $("visualStatus").textContent="Cesium World Terrain and global OpenStreetMap 3D building tiles are connected. Building coverage and detail vary by location.";
+        }catch(buildingError){
+          console.warn("3D building tiles unavailable",buildingError);
+          $("visualStatus").textContent="Terrain is connected; 3D building tiles are unavailable for this session: "+buildingError.message;
+        }
+      } else {
+        $("terrainButton").textContent="⛰ Terrain: needs key";
+        $("visualStatus").textContent="High-resolution imagery is active where available. Add a Cesium ion token to enable terrain elevation and 3D building tiles.";
+      }
+    }catch(e){$("terrainButton").textContent="⛰ Terrain: needs key";}
   }
   const modeConfig={
     explore:{base:"satellite",quakes:true,places:false},
@@ -274,7 +300,12 @@
       $("advancedStatus").innerHTML='<div class="card"><b>Windy Webcams API v3</b><div class="source bad">REQUEST FAILED</div><div class="source">'+esc(e.message)+'</div></div>';
     }
   }
-  function fly(lat,lon,height=1500000){state.viewer?.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lon,lat,height),duration:1.5});state.selected={lat,lon};}
+  function fly(lat,lon,height=1500000){
+    const safeHeight=Math.max(35,Math.min(30000000,height));
+    state.viewer?.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lon,lat,safeHeight),duration:safeHeight<3000?1.1:1.7});
+    state.selected={lat,lon};
+    $("cursorReadout").textContent="TARGET "+lat.toFixed(5)+" / "+lon.toFixed(5)+" · "+Math.round(safeHeight)+" m";
+  }
   async function loadQuakes(){
     if(state.loading)return; state.loading=true;
     try{
@@ -323,7 +354,7 @@
   async function search(q){
     $("searchResults").innerHTML='<div class="empty">Searching OpenStreetMap…</div>';
     try{const d=await api("/api/geocode?q="+encodeURIComponent(q));$("searchResults").innerHTML=d.results.map((r,i)=>'<button class="layer searchhit" data-index="'+i+'" style="width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid #1c3041"><span>'+esc(r.name)+'</span></button>').join("")||'<div class="empty">No matching locations.</div>';
-      document.querySelectorAll(".searchhit").forEach((b,i)=>b.addEventListener("click",()=>{const r=d.results[i];fly(r.latitude,r.longitude,900000);inspectLocation(r.latitude,r.longitude);$("searchResults").innerHTML="";}));
+      document.querySelectorAll(".searchhit").forEach((b,i)=>b.addEventListener("click",()=>{const r=d.results[i];fly(r.latitude,r.longitude,12000);inspectLocation(r.latitude,r.longitude);$("searchResults").innerHTML="";}));
     }catch(e){$("searchResults").innerHTML='<div class="empty bad">Search unavailable: '+esc(e.message)+'</div>';}
   }
   async function loadHealth(){
@@ -340,8 +371,8 @@
   document.querySelectorAll("[data-days]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-days]").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.days=Number(b.dataset.days);loadQuakes();}));
   document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{const views={africa:[20,0,18000000],europe:[15,52,10000000],asia:[100,30,18000000],americas:[-85,20,22000000]};fly(...views[b.dataset.view]);}));
   $("homeBtn").addEventListener("click",()=>state.viewer?.camera.flyHome(1.4));
-  $("zoomIn").addEventListener("click",()=>state.viewer?.camera.zoomIn(800000));
-  $("zoomOut").addEventListener("click",()=>state.viewer?.camera.zoomOut(800000));
+  $("zoomIn").addEventListener("click",()=>state.viewer?.camera.zoomIn(Math.max(35,state.viewer.camera.positionCartographic.height*0.45)));
+  $("zoomOut").addEventListener("click",()=>state.viewer?.camera.zoomOut(Math.max(100,state.viewer.camera.positionCartographic.height*0.65)));
   $("refreshBtn").addEventListener("click",()=>{loadQuakes();loadHealth();if($("weatherToggle").checked||$("airToggle").checked||$("placesToggle").checked)inspectLocation(state.selected.lat,state.selected.lon);});
   $("locateBtn").addEventListener("click",()=>{if(!navigator.geolocation){$("localIntel").textContent="Location services are not supported by this browser.";return;}navigator.geolocation.getCurrentPosition(p=>{fly(p.coords.latitude,p.coords.longitude,500000);inspectLocation(p.coords.latitude,p.coords.longitude);},e=>{$("localIntel").textContent="Location unavailable: "+e.message;},{enableHighAccuracy:false,timeout:10000});});
   ["weatherToggle","airToggle","placesToggle"].forEach(id=>$(id).addEventListener("change",()=>inspectLocation(state.selected.lat,state.selected.lon)));
