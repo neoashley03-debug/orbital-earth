@@ -332,6 +332,64 @@ async def cameras(
     }
 
 
+
+
+_health_cache: tuple[float, dict[str, Any]] | None = None
+_health_lock = asyncio.Lock()
+
+
+@app.get("/api/source-health")
+async def source_health() -> dict[str, Any]:
+    """Probe real upstream endpoints and report measured reachability, not configuration alone."""
+    global _health_cache
+    now = time.time()
+    async with _health_lock:
+        if _health_cache and now - _health_cache[0] < 120:
+            return _health_cache[1]
+
+    probes = [
+        ("USGS Earthquakes", "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson", None),
+        ("Open-Meteo", "https://api.open-meteo.com/v1/forecast", {"latitude": 0, "longitude": 0, "current": "temperature_2m"}),
+        ("OpenStreetMap Nominatim", "https://nominatim.openstreetmap.org/search", {"q": "Pretoria", "format": "jsonv2", "limit": 1}),
+        ("Overpass · Kumi", "https://overpass.kumi.systems/api/status", None),
+        ("Overpass · Main", "https://overpass-api.de/api/status", None),
+        ("Overpass · Taiwan", "https://overpass.nchc.org.tw/api/status", None),
+    ]
+
+    async def probe(name: str, url: str, params: dict[str, Any] | None) -> dict[str, Any]:
+        started = time.perf_counter()
+        try:
+            headers = {"User-Agent": "OrbitalEarth/1.0 (public geospatial information client)", "Accept": "application/json,text/plain"}
+            async with httpx.AsyncClient(timeout=httpx.Timeout(5.0, connect=3.0), follow_redirects=True) as client:
+                response = await client.get(url, params=params, headers=headers)
+                response.raise_for_status()
+            return {"name": name, "status": "online", "http_status": response.status_code,
+                    "latency_ms": round((time.perf_counter() - started) * 1000)}
+        except httpx.HTTPStatusError as exc:
+            return {"name": name, "status": "degraded", "http_status": exc.response.status_code,
+                    "latency_ms": round((time.perf_counter() - started) * 1000)}
+        except Exception as exc:
+            return {"name": name, "status": "unavailable", "error": type(exc).__name__,
+                    "latency_ms": round((time.perf_counter() - started) * 1000)}
+
+    results = await asyncio.gather(*(probe(*item) for item in probes))
+    overpass = [item for item in results if item["name"].startswith("Overpass")]
+    core = [item for item in results if not item["name"].startswith("Overpass")]
+    online_core = sum(item["status"] == "online" for item in core)
+    result = {
+        "checked_at": int(time.time()),
+        "cache_seconds": 120,
+        "overall": "online" if online_core == len(core) and any(item["status"] == "online" for item in overpass)
+                   else "degraded" if online_core or any(item["status"] == "online" for item in overpass)
+                   else "unavailable",
+        "sources": results,
+        "note": "Reachability probes only. A successful probe does not guarantee every data request or geographic area is covered."
+    }
+    async with _health_lock:
+        _health_cache = (time.time(), result)
+    return result
+
+
 @app.get("/api/capabilities")
 async def capabilities() -> dict[str, Any]:
     cameras_configured = bool(os.getenv("WINDY_WEBCAMS_API_KEY", "").strip())
