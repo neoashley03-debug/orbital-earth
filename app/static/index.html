@@ -15,6 +15,7 @@
 <style>
 :root{color-scheme:dark;--bg:#07111d;--panel:rgba(9,20,33,.94);--panel2:#0e1c2b;--line:#203448;--text:#e8f1fa;--muted:#8ca2b8;--cyan:#54d8e8;--green:#54d6a0;--amber:#f4bd65;--red:#ff7272}
 *{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer;color:inherit}.app{height:100%;display:grid;grid-template-rows:62px 1fr;overflow:hidden}.top{display:flex;align-items:center;gap:18px;padding:0 18px;background:#091522;border-bottom:1px solid var(--line);z-index:5}.brand{display:flex;align-items:center;gap:10px;min-width:220px}.brandmark{width:34px;height:34px;border:1px solid #2b7185;border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:19px;box-shadow:0 0 20px #36b8d51f}.brand strong{letter-spacing:.14em;font-size:13px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.18em}.statusline{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px}.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 9px #54d6a0}.topright{margin-left:auto;display:flex;align-items:center;gap:12px}.utc{color:#b7c9d8;font-variant-numeric:tabular-nums;font-size:12px}.iconbtn,.toolbtn,.tabbtn{border:1px solid var(--line);background:#102133;border-radius:7px;padding:8px 11px}.iconbtn:hover,.toolbtn:hover,.tabbtn:hover{border-color:#39869a}.layout{display:grid;grid-template-columns:310px minmax(0,1fr) 300px;min-height:0}.left,.right{background:var(--panel);overflow:auto;z-index:3}.left{border-right:1px solid var(--line)}.right{border-left:1px solid var(--line)}.section{padding:15px;border-bottom:1px solid var(--line)}.eyebrow{font-size:10px;color:var(--cyan);letter-spacing:.17em;text-transform:uppercase;margin-bottom:10px}.section h2{font-size:13px;letter-spacing:.04em;margin:0 0 12px}.muted{color:var(--muted)}.searchrow{display:flex;gap:6px}.searchrow input{min-width:0;flex:1;background:#081522;border:1px solid var(--line);border-radius:7px;padding:10px;color:var(--text);outline:none}.searchrow input:focus{border-color:var(--cyan)}.searchrow button,.primary{background:#124454;border:1px solid #28788a;border-radius:7px;padding:9px 11px;color:#d9fbff}.quick{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chip{border:1px solid var(--line);background:#0c1b2a;border-radius:20px;padding:6px 9px;font-size:11px;color:#c4d5e2}.chip.active{border-color:#3b9bab;color:var(--cyan);background:#10303b}.layer{display:flex;align-items:center;gap:9px;padding:8px 0;color:#d5e2ed;font-size:12px}.layer input{accent-color:#45c7d9}.layer small{margin-left:auto;color:var(--muted);font-size:10px}.mapwrap{position:relative;min-width:0;min-height:0;background:#06101b}.map{position:absolute;inset:0}.mapoverlay{position:absolute;z-index:2;pointer-events:none}.mapoverlay>*{pointer-events:auto}.maptop{top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:10px}.maplabel,.maptools{background:rgba(6,17,28,.85);border:1px solid #284055;border-radius:8px;padding:9px 12px;backdrop-filter:blur(12px)}.maplabel strong{font-size:11px;letter-spacing:.13em}.maplabel span{display:block;font-size:10px;color:var(--muted)}.maptools{display:flex;gap:6px}.maptools button{background:transparent;border:0;color:#d5e7f3;padding:3px 7px;font-size:11px}.crosshair{bottom:14px;left:14px;background:#06111dcc;border:1px solid #284055;border-radius:7px;padding:7px 10px;font-size:10px;color:#c3d5e2}.scale{bottom:14px;right:14px;background:#06111dcc;border:1px solid #284055;border-radius:7px;padding:7px 10px;font-size:10px;color:#c3d5e2}.card{background:#0b1a29;border:1px solid var(--line);border-radius:8px;padding:11px;margin-top:8px}.metric{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:5px 0;border-bottom:1px solid #1b2c3d}.metric:last-child{border:0}.metric b{font-weight:600;color:#edf7ff;text-align:right}.source{font-size:10px;color:var(--muted);margin-top:8px}.source a{color:var(--cyan);text-decoration:none}.event{border-left:2px solid #b98d4d;padding:7px 9px;margin:8px 0;background:#101f2e;border-radius:0 6px 6px 0}.event b{display:block;font-size:11px}.event span{font-size:10px;color:var(--muted)}.empty{font-size:11px;color:var(--muted);padding:10px 0}.statuspill{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:#a9c2d4;background:#102335;border:1px solid #294458;border-radius:20px;padding:4px 8px}.statuspill .dot{width:6px;height:6px}.warn{color:var(--amber)}.bad{color:var(--red)}.footer{font-size:10px;color:#71879b;line-height:1.5}.mobilebar{display:none}
+.modegrid{display:flex;flex-wrap:wrap;gap:6px}.modegrid button{border:1px solid var(--line);background:#0c1b2a;border-radius:18px;padding:6px 9px;font-size:11px;color:#c4d5e2}.modegrid button.active{border-color:#3b9bab;color:var(--cyan);background:#10303b}.modecontrols{display:grid;grid-template-columns:1fr 1fr;gap:8px}.modecontrols select{min-width:0;width:100%;background:#081522;border:1px solid var(--line);border-radius:7px;padding:8px;color:var(--text)}.modehint{font-size:10px;color:var(--muted);line-height:1.4;margin-top:7px}
 #cesiumContainer .cesium-viewer-bottom{display:block;left:auto;right:8px;bottom:42px}#cesiumContainer .cesium-widget-credits{display:block;font-size:9px;opacity:.85}
 @media(max-width:1050px){.layout{grid-template-columns:270px minmax(0,1fr)}.right{display:none}}
 @media(max-width:700px){.app{grid-template-rows:56px 1fr}.top{padding:0 11px}.brand{min-width:0}.brand small,.statusline{display:none}.topright{gap:6px}.utc{font-size:10px}.layout{display:block;position:relative}.mapwrap{position:absolute;inset:0}.left{position:absolute;z-index:4;left:0;top:0;bottom:0;width:min(86vw,320px);transform:translateX(-102%);transition:transform .2s ease;box-shadow:12px 0 40px #0008}.left.open{transform:translateX(0)}.right{display:none}.mobilebar{display:flex;position:absolute;z-index:3;top:12px;left:12px}.maptop{left:60px}.maplabel{display:none}.maptools{margin-left:auto}.maptools button{padding:5px}.crosshair{bottom:12px;left:12px}.scale{bottom:12px;right:12px}}
@@ -42,6 +43,46 @@
     <label class="layer"><input type="checkbox" id="placesToggle"> Nearby amenities <small>OSM</small></label>
     <label class="layer"><input type="checkbox" id="weatherToggle"> Weather at centre <small>Open-Meteo</small></label>
     <label class="layer"><input type="checkbox" id="airToggle"> Air quality at centre <small>Open-Meteo</small></label>
+  </section>
+  <section class="section">
+    <div class="eyebrow">Experience modes</div><h2>Orbital Earth modes</h2>
+    <div class="modegrid" id="modeButtons">
+      <button data-mode="explore" class="active">🧭 Explore</button>
+      <button data-mode="hike">🥾 Hike</button>
+      <button data-mode="navigate">🚗 Navigate</button>
+      <button data-mode="geopolitics">🌐 Geopolitics</button>
+      <button data-mode="news">📰 News</button>
+    </div>
+    <div class="eyebrow" style="margin-top:13px">Map appearance</div>
+    <div class="modecontrols">
+      <label style="display:block">Basemap
+        <select id="basemapSelect">
+          <option value="satellite">Satellite imagery</option>
+          <option value="sentinel">Sentinel-2 mosaic · 2020</option>
+          <option value="modis">NASA MODIS · recent daily</option>
+          <option value="night">Night lights · 2016 reference</option>
+          <option value="street">Street map</option>
+        </select>
+      </label>
+      <label style="display:block">Display quality
+        <select id="qualitySelect">
+          <option value="auto">Auto</option>
+          <option value="hd">HD render</option>
+          <option value="4k">4K render</option>
+          <option value="8k">8K render</option>
+        </select>
+      </label>
+    </div>
+    <div class="quick">
+      <button class="chip active" data-scene="3d">3D Globe</button>
+      <button class="chip" data-scene="2d">2D Map</button>
+      <button class="chip" id="terrainButton">⛰ Terrain: unavailable</button>
+    </div>
+    <div class="quick">
+      <button class="chip" id="streetViewBtn">Street-level view ↗</button>
+      <button class="chip" id="cameraViewBtn">Camera view</button>
+    </div>
+    <div class="modehint" id="visualStatus">Satellite detail depends on the imagery provider and location. Display quality changes rendering only; it cannot create higher-resolution source imagery.</div>
   </section>
   <section class="section">
     <div class="eyebrow">Observation filters</div><h2>Earthquake activity</h2>
@@ -130,6 +171,84 @@
       $("cursorReadout").textContent="LAT "+Cesium.Math.toDegrees(point.latitude).toFixed(3)+" / LON "+Cesium.Math.toDegrees(point.longitude).toFixed(3);
     },Cesium.ScreenSpaceEventType.MOUSE_MOVE);
   }
+  const imagery = {
+    satellite: () => new Cesium.UrlTemplateImageryProvider({url:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",maximumLevel:19,credit:"Esri World Imagery"}),
+    sentinel: () => new Cesium.UrlTemplateImageryProvider({url:"https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg",maximumLevel:14,credit:"Sentinel-2 cloudless mosaic · EOX"}),
+    street: () => new Cesium.UrlTemplateImageryProvider({url:"https://tile.openstreetmap.org/{z}/{x}/{y}.png",maximumLevel:19,credit:"© OpenStreetMap contributors"}),
+    modis: () => { const d=new Date(Date.now()-86400000).toISOString().slice(0,10); return new Cesium.UrlTemplateImageryProvider({url:"https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/"+d+"/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",maximumLevel:9,credit:"NASA GIBS / MODIS · date shown in URL"}); },
+    night: () => new Cesium.UrlTemplateImageryProvider({url:"https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png",maximumLevel:8,credit:"NASA VIIRS Black Marble · 2016 reference"})
+  };
+  let terrainEnabled=false, ionToken="";
+  async function setBasemap(name){
+    if(!state.viewer)return;
+    try{
+      const provider=imagery[name]();
+      state.viewer.imageryLayers.removeAll(true);
+      state.viewer.imageryLayers.addImageryProvider(provider);
+      $("basemapSelect").value=name;
+      $("basemapStatus").textContent="BASEMAP: "+name.toUpperCase();
+      $("visualStatus").textContent="Basemap: "+name+". Imagery resolution and acquisition date vary by provider and location.";
+    }catch(e){$("visualStatus").textContent="Basemap unavailable: "+e.message;}
+  }
+  function setQuality(name){
+    if(!state.viewer)return;
+    const presets={auto:Math.min(window.devicePixelRatio||1,1.5),hd:1.25,"4k":1.5,"8k":1.75};
+    const scale=presets[name]||1;
+    state.viewer.resolutionScale=scale;
+    state.viewer.scene.requestRender();
+    $("visualStatus").textContent=name.toUpperCase()+" display preset applied at "+scale+"× render scale. This does not increase the source imagery resolution; actual detail depends on the provider and device.";
+  }
+  async function setTerrain(enabled){
+    if(!state.viewer)return;
+    if(!enabled){
+      state.viewer.terrainProvider=new Cesium.EllipsoidTerrainProvider();
+      terrainEnabled=false;$("terrainButton").textContent="⛰ Terrain: off";return;
+    }
+    if(!ionToken){
+      $("terrainButton").textContent="⛰ Terrain: needs key";
+      $("visualStatus").textContent="3D mountain terrain needs a restricted Cesium ion access token. No token is configured, so the app will not pretend the ellipsoid is real terrain.";
+      $("terrainToggle");
+      return;
+    }
+    try{
+      Cesium.Ion.defaultAccessToken=ionToken;
+      state.viewer.terrainProvider=await Cesium.CesiumTerrainProvider.fromIonAssetId(1,{requestVertexNormals:true,requestWaterMask:true});
+      state.viewer.scene.globe.depthTestAgainstTerrain=true;
+      terrainEnabled=true;$("terrainButton").textContent="⛰ Terrain: on";
+      $("visualStatus").textContent="Cesium World Terrain connected. Relief detail varies by region.";
+    }catch(e){
+      $("terrainButton").textContent="⛰ Terrain: unavailable";
+      $("visualStatus").textContent="Terrain provider could not be loaded: "+e.message;
+    }
+  }
+  async function loadClientConfig(){
+    try{const c=await api("/api/client-config");ionToken=c.cesium_ion_token||"";if(ionToken)$("terrainButton").textContent="⛰ Terrain: ready";}
+    catch(e){$("terrainButton").textContent="⛰ Terrain: needs key";}
+  }
+  const modeConfig={
+    explore:{base:"satellite",quakes:true,places:false},
+    hike:{base:"sentinel",quakes:false,places:true},
+    navigate:{base:"street",quakes:false,places:true},
+    geopolitics:{base:"night",quakes:true,places:false},
+    news:{base:"modis",quakes:false,places:false}
+  };
+  async function setMode(name){
+    const m=modeConfig[name];if(!m)return;
+    document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("active",b.dataset.mode===name));
+    $("earthquakesToggle").checked=m.quakes;state.quakeLayer.show=m.quakes;
+    $("placesToggle").checked=m.places;
+    await setBasemap(m.base);
+    if(m.places)inspectLocation(state.selected.lat,state.selected.lon);
+    $("visualStatus").textContent=name==="hike"?"Hike mode: mapped amenities and peaks are shown where OpenStreetMap has coverage. Enable real terrain when a Cesium ion token is configured.":name==="navigate"?"Navigate mode: street basemap and mapped nearby places. Route guidance is not yet connected.":name==="geopolitics"?"Geopolitics mode: night-light reference imagery and verified earthquake observations. A dedicated geopolitical event feed is not connected.":name==="news"?"News mode selected. A verified geolocated news feed is not yet connected.":"Explore mode: satellite imagery and verified earthquake observations.";
+  }
+  function openStreetLevel(){
+    const {lat,lon}=state.selected;
+    window.open("https://www.mapillary.com/app/?lat="+encodeURIComponent(lat)+"&lng="+encodeURIComponent(lon)+"&z=17","_blank","noopener");
+    $("visualStatus").textContent="Opening Mapillary street-level imagery for the selected coordinates. Image coverage depends on contributor availability; this is an external viewer, not a live camera.";
+  }
+  function openCameraView(){
+    $("visualStatus").textContent="Camera view is not connected. No verified public camera feed provider or authorized camera endpoints are configured; no simulated streams are shown.";
+  }
   function fly(lat,lon,height=1500000){state.viewer?.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lon,lat,height),duration:1.5});state.selected={lat,lon};}
   async function loadQuakes(){
     if(state.loading)return; state.loading=true;
@@ -202,6 +321,17 @@
   ["weatherToggle","airToggle","placesToggle"].forEach(id=>$(id).addEventListener("change",()=>inspectLocation(state.selected.lat,state.selected.lon)));
   $("earthquakesToggle").addEventListener("change",e=>{state.quakeLayer.show=e.target.checked;});
   $("menuBtn").addEventListener("click",()=>$("leftPanel").classList.toggle("open"));
+  $("basemapSelect").addEventListener("change",e=>setBasemap(e.target.value));
+  $("qualitySelect").addEventListener("change",e=>setQuality(e.target.value));
+  document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));
+  document.querySelectorAll("[data-scene]").forEach(b=>b.addEventListener("click",()=>{
+    if(!state.viewer)return;
+    state.viewer.scene.mode=b.dataset.scene==="2d"?Cesium.SceneMode.SCENE2D:Cesium.SceneMode.SCENE3D;
+    document.querySelectorAll("[data-scene]").forEach(x=>x.classList.toggle("active",x===b));
+  }));
+  $("terrainButton").addEventListener("click",()=>setTerrain(!terrainEnabled));
+  $("streetViewBtn").addEventListener("click",openStreetLevel);
+  $("cameraViewBtn").addEventListener("click",openCameraView);
   // Initialize the viewer and its data layers before any live feed can draw.
   // This prevents a slow imagery-provider response from racing the data loaders.
   initGlobe().then(async()=>{
@@ -210,6 +340,9 @@
     await state.viewer.dataSources.add(state.quakeLayer);
     await state.viewer.dataSources.add(state.placesLayer);
     state.viewer.scene.requestRender();
+    await loadClientConfig();
+    await setBasemap("satellite");
+    setQuality("auto");
     loadQuakes();
     loadHealth();
     setInterval(loadQuakes,120000);
