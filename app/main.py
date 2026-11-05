@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import os
 import time
-from typing import Any
+from typing import Any\nfrom datetime import datetime, timedelta, timezone
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
@@ -79,8 +79,23 @@ async def health() -> dict[str, Any]:
 @app.get("/api/earthquakes")
 async def earthquakes(days: int = Query(default=1, ge=1, le=30),
                       min_magnitude: float = Query(default=2.5, ge=0, le=10)) -> dict[str, Any]:
-    url = f"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_{days}_day.geojson"
-    payload = await fetch_json(url, cache_key=f"usgs:{days}", ttl=90)
+    # USGS summary feeds only publish day/week/month windows. Use the FDSN
+    # event API for arbitrary 1–30 day windows so every filter maps to a valid query.
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(days=days)
+    payload = await fetch_json(
+        "https://earthquake.usgs.gov/fdsnws/event/1/query",
+        params={
+            "format": "geojson",
+            "starttime": start.strftime("%Y-%m-%dT%H:%M:%S"),
+            "endtime": end.strftime("%Y-%m-%dT%H:%M:%S"),
+            "minmagnitude": min_magnitude,
+            "orderby": "time",
+            "limit": 2000,
+        },
+        cache_key=f"usgs:{days}:{min_magnitude}",
+        ttl=90,
+    )
     features = []
     for feature in payload.get("features", []):
         props = feature.get("properties") or {}
