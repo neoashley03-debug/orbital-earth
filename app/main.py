@@ -242,21 +242,64 @@ async def places(latitude: float = Query(ge=-90, le=90),
     }
 
 
+@app.get("/api/cameras")
+async def cameras(
+    north_lat: float = Query(default=84, ge=-90, le=90),
+    east_lon: float = Query(default=180, ge=-180, le=180),
+    south_lat: float = Query(default=-60, ge=-90, le=90),
+    west_lon: float = Query(default=-180, ge=-180, le=180),
+    zoom: int = Query(default=3, ge=0, le=18),
+) -> dict[str, Any]:
+    """Proxy current Windy Webcams v3 map clusters without caching signed image URLs."""
+    api_key = os.getenv("WINDY_WEBCAMS_API_KEY", "").strip()
+    if not api_key:
+        raise HTTPException(status_code=503, detail="Windy Webcams API key is not configured on the server.")
+    if south_lat >= north_lat or west_lon == east_lon:
+        raise HTTPException(status_code=422, detail="Invalid map bounds.")
+    payload = await fetch_json(
+        "https://api.windy.com/webcams/api/v3/map/clusters",
+        params={
+            "northLat": north_lat, "eastLon": east_lon,
+            "southLat": south_lat, "westLon": west_lon,
+            "zoom": zoom,
+            "include": "categories,images,location,player,urls",
+            "lang": "en",
+        },
+        cache_key=f"windy-cameras:{north_lat}:{east_lon}:{south_lat}:{west_lon}:{zoom}:{int(time.time())}",
+        ttl=0,
+        headers={"x-windy-api-key": api_key},
+    )
+    return {
+        "source": "Windy Webcams API v3",
+        "source_url": "https://api.windy.com/webcams/docs",
+        "retrieved_at": int(time.time()),
+        "data": payload,
+        "notice": "Provider response only. Image URLs can expire; reload to refresh them.",
+    }
+
+
 @app.get("/api/capabilities")
 async def capabilities() -> dict[str, Any]:
+    cameras_configured = bool(os.getenv("WINDY_WEBCAMS_API_KEY", "").strip())
+    available = [
+        {"id": "globe", "name": "3D Earth globe", "status": "available", "note": "CesiumJS with Esri World Imagery basemap; imagery acquisition dates vary."},
+        {"id": "earthquakes", "name": "Earthquakes", "status": "live_source", "source": "USGS"},
+        {"id": "weather", "name": "Weather", "status": "live_source", "source": "Open-Meteo"},
+        {"id": "air", "name": "Air quality", "status": "live_source", "source": "Open-Meteo"},
+        {"id": "geocode", "name": "Location search", "status": "live_source", "source": "OpenStreetMap Nominatim"},
+        {"id": "places", "name": "Nearby places and natural peaks", "status": "live_source", "source": "OpenStreetMap Overpass"},
+    ]
+    not_connected = [
+        {"id": "drones", "name": "Drone telemetry", "status": "not_connected", "note": "Requires an authorized operator or provider integration."},
+        {"id": "satellite_realtime", "name": "Real-time satellite tasking", "status": "not_connected", "note": "The basemap is not represented as live satellite tasking."},
+    ]
+    if cameras_configured:
+        available.append({"id": "cameras", "name": "Public camera directory", "status": "configured", "source": "Windy Webcams API v3", "note": "Live camera coverage is requested for the visible map bounds. Individual streams depend on provider availability."})
+    else:
+        not_connected.insert(0, {"id": "cameras", "name": "Public camera feeds", "status": "not_connected", "note": "Windy Webcams API key is not configured. No placeholder stream is presented as live."})
     return {
-        "available": [
-            {"id": "globe", "name": "3D Earth globe", "status": "available", "note": "CesiumJS with Esri World Imagery basemap; imagery acquisition dates vary."},
-            {"id": "earthquakes", "name": "Earthquakes", "status": "live_source", "source": "USGS"},
-            {"id": "weather", "name": "Weather", "status": "live_source", "source": "Open-Meteo"},
-            {"id": "air", "name": "Air quality", "status": "live_source", "source": "Open-Meteo"},
-            {"id": "geocode", "name": "Location search", "status": "live_source", "source": "OpenStreetMap Nominatim"},
-            {"id": "places", "name": "Nearby places and natural peaks", "status": "live_source", "source": "OpenStreetMap Overpass"},
-        ],
-        "not_connected": [
-            {"id": "cameras", "name": "Public camera feeds", "status": "not_connected", "note": "No verified feed endpoints configured. No preview or placeholder stream is presented as live."},
-            {"id": "drones", "name": "Drone telemetry", "status": "not_connected", "note": "Requires an authorized operator or provider integration."},
-            {"id": "satellite_realtime", "name": "Real-time satellite tasking", "status": "not_connected", "note": "The basemap is not represented as live satellite tasking."},
-        ],
+        "available": available,
+        "not_connected": not_connected,
         "policy": "Only source-backed data is displayed. Unavailable integrations remain explicitly disconnected.",
     }
+
