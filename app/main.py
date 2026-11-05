@@ -65,6 +65,12 @@ async def home() -> HTMLResponse:
     return HTMLResponse(index.read_text(encoding="utf-8"))
 
 
+@app.get("/api/client-config")
+async def client_config() -> dict[str, str]:
+    # Restrict this browser token to this app domain and minimum required assets.
+    return {"cesium_ion_token": os.getenv("CESIUM_ION_TOKEN", "")}
+
+
 @app.get("/api/health")
 async def health() -> dict[str, Any]:
     return {
@@ -199,7 +205,11 @@ async def places(latitude: float = Query(ge=-90, le=90),
     query = f"""
     [out:json][timeout:10];
     (node(around:{radius},{latitude},{longitude})[amenity];
-     way(around:{radius},{latitude},{longitude})[amenity];);
+     way(around:{radius},{latitude},{longitude})[amenity];
+     node(around:{radius},{latitude},{longitude})[natural=peak];
+     way(around:{radius},{latitude},{longitude})[natural=peak];
+     node(around:{radius},{latitude},{longitude})[tourism~"viewpoint|alpine_hut"];
+     way(around:{radius},{latitude},{longitude})[tourism~"viewpoint|alpine_hut"];);
     out center tags 40;
     """
     payload = await fetch_json(
@@ -218,8 +228,8 @@ async def places(latitude: float = Query(ge=-90, le=90),
             continue
         results.append({
             "id": f"{item.get('type')}/{item.get('id')}",
-            "name": tags.get("name") or tags.get("amenity") or "Unnamed place",
-            "category": tags.get("amenity"),
+            "name": tags.get("name") or tags.get("amenity") or tags.get("natural") or tags.get("tourism") or "Unnamed place",
+            "category": tags.get("amenity") or tags.get("natural") or tags.get("tourism"),
             "latitude": lat,
             "longitude": lon,
         })
@@ -241,7 +251,7 @@ async def capabilities() -> dict[str, Any]:
             {"id": "weather", "name": "Weather", "status": "live_source", "source": "Open-Meteo"},
             {"id": "air", "name": "Air quality", "status": "live_source", "source": "Open-Meteo"},
             {"id": "geocode", "name": "Location search", "status": "live_source", "source": "OpenStreetMap Nominatim"},
-            {"id": "places", "name": "Nearby places", "status": "live_source", "source": "OpenStreetMap Overpass"},
+            {"id": "places", "name": "Nearby places and natural peaks", "status": "live_source", "source": "OpenStreetMap Overpass"},
         ],
         "not_connected": [
             {"id": "cameras", "name": "Public camera feeds", "status": "not_connected", "note": "No verified feed endpoints configured. No preview or placeholder stream is presented as live."},
