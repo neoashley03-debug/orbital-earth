@@ -329,6 +329,7 @@
   async function inspectLocation(lat,lon){
     const requestId=++state.localRequestId;
     state.selected={lat,lon};
+    if(!$("placesToggle").checked&&state.placesLayer)state.placesLayer.entities.removeAll();
     $("localIntel").innerHTML='<div class="empty">Retrieving source-backed local observations…</div>';
     const jobs=[];
     if($("weatherToggle").checked)jobs.push(api("/api/weather?latitude="+lat+"&longitude="+lon).then(d=>({type:"weather",d})).catch(e=>({type:"error",name:"Weather",e})));
@@ -413,6 +414,7 @@
     loadQuakes();
     loadHealth();
     setInterval(loadQuakes,120000);
+    setInterval(loadHealth,120000);
   }).catch(err=>{
     console.error("Orbital Earth globe initialization failed:",err);
     $("connectionText").textContent="GLOBE INITIALIZATION FAILED";
