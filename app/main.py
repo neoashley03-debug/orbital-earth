@@ -51,6 +51,14 @@ async def fetch_json(url: str, *, params: dict[str, Any] | None = None,
             response = await client.get(url, params=params, headers=request_headers)
             response.raise_for_status()
             payload = response.json()
+    except httpx.HTTPStatusError as exc:
+        # Include the provider status and a short sanitized response hint so
+        # upstream auth, quota, and validation failures can be diagnosed.
+        hint = " ".join((exc.response.text or "").split())[:240]
+        detail = f"Upstream returned HTTP {exc.response.status_code}"
+        if hint:
+            detail += f": {hint}"
+        raise HTTPException(status_code=502, detail=detail) from exc
     except (httpx.HTTPError, ValueError) as exc:
         raise HTTPException(status_code=502, detail=f"Upstream data source unavailable: {type(exc).__name__}") from exc
 
@@ -256,16 +264,25 @@ async def cameras(
         raise HTTPException(status_code=503, detail="Windy Webcams API key is not configured on the server.")
     if south_lat >= north_lat or west_lon == east_lon:
         raise HTTPException(status_code=422, detail="Invalid map bounds.")
+    # Windy cluster zoom is constrained by the geographic span of the requested
+    # bounding box. Cesium's camera zoom is not the same scale as Windy's tile zoom.
+    lat_span = north_lat - south_lat
+    lon_span = (east_lon - west_lon) % 360
+    if lon_span <= 0:
+        lon_span = 360
+    max_zoom_by_lat = 4 + __import__("math").log2(22.5 / lat_span)
+    max_zoom_by_lon = 4 + __import__("math").log2(45.0 / lon_span)
+    provider_zoom = max(0, min(18, zoom, int(min(max_zoom_by_lat, max_zoom_by_lon))))
     payload = await fetch_json(
         "https://api.windy.com/webcams/api/v3/map/clusters",
         params={
             "northLat": north_lat, "eastLon": east_lon,
             "southLat": south_lat, "westLon": west_lon,
-            "zoom": zoom,
+            "zoom": provider_zoom,
             "include": "categories,images,location,player,urls",
             "lang": "en",
         },
-        cache_key=f"windy-cameras:{north_lat}:{east_lon}:{south_lat}:{west_lon}:{zoom}:{int(time.time())}",
+        cache_key=f"windy-cameras:{north_lat}:{east_lon}:{south_lat}:{west_lon}:{provider_zoom}:{int(time.time())}",
         ttl=0,
         headers={"x-windy-api-key": api_key},
     )
