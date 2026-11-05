@@ -122,7 +122,7 @@
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  const state = { days: 1, minMag: 2.5, viewer: null, quakeLayer: null, placesLayer: null, buildingsTileset: null, selected: {lat: -25.746, lon: 28.188}, quakeData: [], loading: false };
+  const state = { days: 1, minMag: 2.5, viewer: null, quakeLayer: null, placesLayer: null, buildingsTileset: null, selected: {lat: -25.746, lon: 28.188}, quakeData: [], loading: false, quakeRequestId: 0, localRequestId: 0 };
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const time = ms => ms ? new Date(ms).toLocaleString() : "—";
   const api = async (path) => { const r = await fetch(path, {headers: {"Accept":"application/json"}}); if (!r.ok) { let d={}; try{d=await r.json()}catch{} throw new Error(d.detail || ("HTTP "+r.status)); } return r.json(); };
@@ -307,9 +307,10 @@
     $("cursorReadout").textContent="TARGET "+lat.toFixed(5)+" / "+lon.toFixed(5)+" · "+Math.round(safeHeight)+" m";
   }
   async function loadQuakes(){
-    if(state.loading)return; state.loading=true;
+    const requestId=++state.quakeRequestId; state.loading=true;
     try{
       const d=await api("/api/earthquakes?days="+state.days+"&min_magnitude="+state.minMag);
+      if(requestId!==state.quakeRequestId)return;
       state.quakeData=d.features||[];
       const layer=state.quakeLayer; layer.entities.removeAll();
       for(const q of state.quakeData){
@@ -322,10 +323,11 @@
       $("maxMagnitude").textContent=state.quakeData.length?Math.max(...state.quakeData.map(q=>q.magnitude||0)).toFixed(1):"—";
       $("lastUpdate").textContent=new Date(d.retrieved_at*1000).toLocaleTimeString();
       $("eventList").innerHTML=state.quakeData.slice(0,8).map(q=>'<div class="event"><b>M'+esc(q.magnitude)+' · '+esc(q.place)+'</b><span>'+esc(time(q.time))+' · '+esc(q.depth_km)+' km depth · <a target="_blank" rel="noopener" href="'+esc(q.url)+'">USGS</a></span></div>').join("")||'<div class="empty">No events match the current filter.</div>';
-    }catch(e){$("eventList").innerHTML='<div class="empty bad">USGS feed unavailable: '+esc(e.message)+'</div>';$("lastUpdate").textContent="Unavailable";}
-    finally{state.loading=false;}
+    }catch(e){if(requestId===state.quakeRequestId){$("eventList").innerHTML='<div class="empty bad">USGS feed unavailable: '+esc(e.message)+'</div>';$("lastUpdate").textContent="Unavailable";}}
+    finally{if(requestId===state.quakeRequestId)state.loading=false;}
   }
   async function inspectLocation(lat,lon){
+    const requestId=++state.localRequestId;
     state.selected={lat,lon};
     $("localIntel").innerHTML='<div class="empty">Retrieving source-backed local observations…</div>';
     const jobs=[];
@@ -334,6 +336,7 @@
     if($("placesToggle").checked)jobs.push(api("/api/places?latitude="+lat+"&longitude="+lon).then(d=>({type:"places",d})).catch(e=>({type:"error",name:"Nearby places",e})));
     if(!jobs.length){$("localIntel").innerHTML='<div class="empty">Select Weather, Air quality or Nearby amenities in the left panel, then click the globe.</div>';return;}
     const results=await Promise.all(jobs);
+    if(requestId!==state.localRequestId)return;
     let html='<div class="metric"><span>Coordinates</span><b>'+lat.toFixed(4)+', '+lon.toFixed(4)+'</b></div>';
     for(const r of results){
       if(r.type==="error"){html+='<div class="card"><b>'+esc(r.name)+'</b><div class="empty bad">'+esc(r.e.message)+'</div></div>';continue;}
@@ -361,10 +364,11 @@
     try{
       const [h,c,p]=await Promise.all([api("/api/health"),api("/api/capabilities"),api("/api/source-health")]);
       const online=p.sources.filter(s=>s.status==="online").length;
-      $("connectionText").textContent="API ONLINE · "+online+"/"+p.sources.length+" UPSTREAM CHECKS ONLINE";
-      $("sourceHealth").innerHTML='<div class="source">Probe time '+esc(new Date(p.checked_at*1000).toLocaleTimeString())+' · cached '+esc(p.cache_seconds)+'s</div>'+
-        p.sources.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="'+(s.status==="online"?"statuspill":s.status==="degraded"?"warn":"bad")+'">'+esc(s.status.toUpperCase())+(s.latency_ms!=null?" · "+esc(s.latency_ms)+" ms":"")+'</b></div>').join("")+
+      $("connectionText").textContent="API "+String(h.status||"UNKNOWN").toUpperCase()+" · "+online+"/"+p.sources.length+" UPSTREAM CHECKS ONLINE";
+      $("sourceHealth").innerHTML='<div class="statuspill">OVERALL: '+esc(String(p.overall||"unknown").toUpperCase())+'</div><div class="source">Probe time '+esc(new Date(p.checked_at*1000).toLocaleTimeString())+' · cached '+esc(p.cache_seconds)+'s</div>'+
+        p.sources.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="'+(s.status==="online"?"statuspill":s.status==="degraded"?"warn":"bad")+'">'+esc(s.status.toUpperCase())+(s.latency_ms!=null?" · "+esc(s.latency_ms)+" ms":"")+(s.http_status?" · HTTP "+esc(s.http_status):"")+(s.error?" · "+esc(s.error):"")+'</b></div>').join("")+
         '<div class="source">'+esc(p.note)+'</div>'+
+        c.available.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="statuspill">'+esc(String(s.status||"available").replaceAll("_"," ").toUpperCase())+'</b></div>').join("")+
         c.not_connected.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="warn">NOT CONNECTED</b></div>').join("");
       $("advancedStatus").innerHTML=c.not_connected.map(s=>'<div class="card"><b>'+esc(s.name)+'</b><div class="source warn">NOT CONNECTED</div><div class="source">'+esc(s.note)+'</div></div>').join("")+c.available.filter(s=>s.id==="cameras").map(s=>'<div class="card"><b>'+esc(s.name)+'</b><div class="source statuspill"><i class="dot"></i> CONFIGURED</div><div class="source">'+esc(s.note)+'</div><button class="chip" id="loadCameraCoverage" style="margin-top:8px">Load camera coverage</button></div>').join("");
       const cameraLoader=$("loadCameraCoverage");if(cameraLoader)cameraLoader.addEventListener("click",openCameraView);
