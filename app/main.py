@@ -209,9 +209,9 @@ async def geocode(q: str = Query(min_length=2, max_length=120)) -> dict[str, Any
 async def places(latitude: float = Query(ge=-90, le=90),
                  longitude: float = Query(ge=-180, le=180),
                  radius: int = Query(default=1000, ge=100, le=5000)) -> dict[str, Any]:
-    # Overpass is community infrastructure; requests are cached and kept small.
+    """Return mapped nearby features using resilient public Overpass mirrors."""
     query = f"""
-    [out:json][timeout:10];
+    [out:json][timeout:8];
     (node(around:{radius},{latitude},{longitude})[amenity];
      way(around:{radius},{latitude},{longitude})[amenity];
      node(around:{radius},{latitude},{longitude})[natural=peak];
@@ -220,13 +220,46 @@ async def places(latitude: float = Query(ge=-90, le=90),
      way(around:{radius},{latitude},{longitude})[tourism~"viewpoint|alpine_hut"];);
     out center tags 40;
     """
-    payload = await fetch_json(
+    cache_key = f"places:{latitude:.3f}:{longitude:.3f}:{radius}"
+    now = time.time()
+    async with _cache_lock:
+        cached = _cache.get(cache_key)
+        if cached and now - cached[0] < 1800:
+            return cached[1]
+
+    # Public Overpass instances are community-operated and may rate-limit or
+    # temporarily fail. Try independent mirrors; never fabricate a fallback.
+    endpoints = (
+        "https://overpass.kumi.systems/api/interpreter",
         "https://overpass-api.de/api/interpreter",
-        params={"data": query},
-        cache_key=f"places:{latitude:.3f}:{longitude:.3f}:{radius}",
-        ttl=1800,
-        headers={"Accept": "application/json"},
+        "https://overpass.nchc.org.tw/api/interpreter",
     )
+    failures: list[str] = []
+    payload = None
+    source_url = ""
+    for endpoint in endpoints:
+        try:
+            payload = await fetch_json(
+                endpoint,
+                params={"data": query},
+                cache_key=f"{cache_key}:{endpoint}",
+                ttl=1800,
+                headers={"Accept": "application/json"},
+            )
+            source_url = endpoint
+            break
+        except HTTPException as exc:
+            failures.append(f"{endpoint.split('/')[2]}: {exc.detail}")
+        except Exception as exc:
+            failures.append(f"{endpoint.split('/')[2]}: {type(exc).__name__}")
+
+    if payload is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Nearby map data is temporarily unavailable from public OpenStreetMap query servers. " +
+                   "Tried " + "; ".join(failures),
+        )
+
     results = []
     for item in payload.get("elements", []):
         tags = item.get("tags") or {}
@@ -241,14 +274,18 @@ async def places(latitude: float = Query(ge=-90, le=90),
             "latitude": lat,
             "longitude": lon,
         })
-    return {
+    result = {
         "source": "OpenStreetMap contributors via Overpass API",
-        "source_url": "https://overpass-api.de/",
+        "source_url": "https://www.openstreetmap.org/",
+        "provider_endpoint": source_url,
         "retrieved_at": int(time.time()),
         "count": len(results),
         "results": results,
+        "notice": "Coverage depends on OpenStreetMap mapping in this area. Zero results means no matching mapped features were returned.",
     }
-
+    async with _cache_lock:
+        _cache[cache_key] = (time.time(), result)
+    return result
 
 @app.get("/api/cameras")
 async def cameras(
