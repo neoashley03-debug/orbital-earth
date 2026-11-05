@@ -185,9 +185,9 @@
   $("earthquakesToggle").addEventListener("change",e=>{state.quakeLayer.show=e.target.checked;});
   $("menuBtn").addEventListener("click",()=>$("leftPanel").classList.toggle("open"));
   initGlobe();
-  if(state.viewer){state.quakeLayer=state.viewer.entities;state.placesLayer=new Cesium.EntityCollection();state.viewer.scene.primitives.add(new Cesium.PrimitiveCollection());}
+  if(state.viewer){state.quakeLayer=new Cesium.CustomDataSource("USGS earthquake observations");state.placesLayer=new Cesium.CustomDataSource("OpenStreetMap places");state.viewer.dataSources.add(state.quakeLayer);state.viewer.dataSources.add(state.placesLayer);}
   // Separate collection for place markers, owned by the viewer.
-  if(state.viewer){state.placesLayer=state.viewer.entities;}
+  
   loadQuakes();loadHealth();
   setInterval(loadQuakes,120000);
   if("serviceWorker" in navigator)navigator.serviceWorker.register("/static/sw.js").catch(()=>{});
