@@ -138,7 +138,7 @@
       const layer=state.quakeLayer; layer.entities.removeAll();
       for(const q of state.quakeData){
         const color=q.magnitude>=5?Cesium.Color.ORANGERED:q.magnitude>=4?Cesium.Color.ORANGE:Cesium.Color.YELLOW;
-        layer.add({position:Cesium.Cartesian3.fromDegrees(q.longitude,q.latitude),point:{pixelSize:Math.max(5,Math.min(18,5+(q.magnitude||0)*1.5)),color,outlineColor:Cesium.Color.BLACK,outlineWidth:1},description:
+        layer.entities.add({position:Cesium.Cartesian3.fromDegrees(q.longitude,q.latitude),point:{pixelSize:Math.max(5,Math.min(18,5+(q.magnitude||0)*1.5)),color,outlineColor:Cesium.Color.BLACK,outlineWidth:1},description:
           "<b>"+esc(q.place)+"</b><br>Magnitude: "+esc(q.magnitude)+"<br>Depth: "+esc(q.depth_km)+" km<br>"+esc(time(q.time))+"<br><a href='"+esc(q.url)+"' target='_blank' rel='noopener'>USGS event details</a>",
           name:"M"+q.magnitude+" · "+(q.place||"Earthquake")});
       }
