@@ -82,6 +82,13 @@
       <button class="chip" id="streetViewBtn">Street-level view ↗</button>
       <button class="chip" id="cameraViewBtn">Camera view</button>
     </div>
+    <div class="eyebrow" style="margin-top:13px">Zoom presets</div>
+    <div class="quick">
+      <button class="chip" data-zoom-height="15000000">Global</button>
+      <button class="chip" data-zoom-height="2500000">Region</button>
+      <button class="chip" data-zoom-height="250000">City</button>
+      <button class="chip" data-zoom-height="25000">Close</button>
+    </div>
     <div class="modehint" id="visualStatus">Satellite detail depends on the imagery provider and location. Display quality changes rendering only; it cannot create higher-resolution source imagery.</div>
   </section>
   <section class="section">
@@ -332,6 +339,7 @@
   $("terrainButton").addEventListener("click",()=>setTerrain(!terrainEnabled));
   $("streetViewBtn").addEventListener("click",openStreetLevel);
   $("cameraViewBtn").addEventListener("click",openCameraView);
+  document.querySelectorAll("[data-zoom-height]").forEach(b=>b.addEventListener("click",()=>fly(state.selected.lat,state.selected.lon,Number(b.dataset.zoomHeight))));
   // Initialize the viewer and its data layers before any live feed can draw.
   // This prevents a slow imagery-provider response from racing the data loaders.
   initGlobe().then(async()=>{
