@@ -359,9 +359,13 @@
   }
   async function loadHealth(){
     try{
-      const [h,c]=await Promise.all([api("/api/health"),api("/api/capabilities")]);
-      $("connectionText").textContent="API ONLINE · SOURCE ATTRIBUTION ACTIVE";
-      $("sourceHealth").innerHTML=c.available.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="statuspill"><i class="dot"></i>'+esc(s.status.replace("_"," "))+'</b></div>').join("")+c.not_connected.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="warn">NOT CONNECTED</b></div>').join("");
+      const [h,c,p]=await Promise.all([api("/api/health"),api("/api/capabilities"),api("/api/source-health")]);
+      const online=p.sources.filter(s=>s.status==="online").length;
+      $("connectionText").textContent="API ONLINE · "+online+"/"+p.sources.length+" UPSTREAM CHECKS ONLINE";
+      $("sourceHealth").innerHTML='<div class="source">Probe time '+esc(new Date(p.checked_at*1000).toLocaleTimeString())+' · cached '+esc(p.cache_seconds)+'s</div>'+
+        p.sources.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="'+(s.status==="online"?"statuspill":s.status==="degraded"?"warn":"bad")+'">'+esc(s.status.toUpperCase())+(s.latency_ms!=null?" · "+esc(s.latency_ms)+" ms":"")+'</b></div>').join("")+
+        '<div class="source">'+esc(p.note)+'</div>'+
+        c.not_connected.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="warn">NOT CONNECTED</b></div>').join("");
       $("advancedStatus").innerHTML=c.not_connected.map(s=>'<div class="card"><b>'+esc(s.name)+'</b><div class="source warn">NOT CONNECTED</div><div class="source">'+esc(s.note)+'</div></div>').join("")+c.available.filter(s=>s.id==="cameras").map(s=>'<div class="card"><b>'+esc(s.name)+'</b><div class="source statuspill"><i class="dot"></i> CONFIGURED</div><div class="source">'+esc(s.note)+'</div><button class="chip" id="loadCameraCoverage" style="margin-top:8px">Load camera coverage</button></div>').join("");
       const cameraLoader=$("loadCameraCoverage");if(cameraLoader)cameraLoader.addEventListener("click",openCameraView);
     }catch(e){$("connectionText").textContent="API CONNECTION DEGRADED";$("sourceHealth").innerHTML='<div class="empty bad">'+esc(e.message)+'</div>';}
