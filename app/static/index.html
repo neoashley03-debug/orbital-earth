@@ -252,8 +252,27 @@
     window.open("https://www.mapillary.com/app/?lat="+encodeURIComponent(lat)+"&lng="+encodeURIComponent(lon)+"&z=17","_blank","noopener");
     $("visualStatus").textContent="Opening Mapillary street-level imagery for the selected coordinates. Image coverage depends on contributor availability; this is an external viewer, not a live camera.";
   }
-  function openCameraView(){
-    $("visualStatus").textContent="Camera view is not connected. No verified public camera feed provider or authorized camera endpoints are configured; no simulated streams are shown.";
+  async function openCameraView(){
+    if(!state.viewer){$("visualStatus").textContent="Globe is not ready yet.";return;}
+    $("visualStatus").textContent="Requesting current camera coverage from Windy Webcams…";
+    const rect=state.viewer.camera.computeViewRectangle();
+    const north=rect?Cesium.Math.toDegrees(rect.north):84;
+    const south=rect?Cesium.Math.toDegrees(rect.south):-60;
+    const west=rect?Cesium.Math.toDegrees(rect.west):-180;
+    const east=rect?Cesium.Math.toDegrees(rect.east):180;
+    const height=state.viewer.camera.positionCartographic.height;
+    const zoom=Math.max(0,Math.min(18,Math.round(17-Math.log2(Math.max(height,1000)/1000))));
+    try{
+      const result=await api("/api/cameras?north_lat="+north+"&east_lon="+east+"&south_lat="+south+"&west_lon="+west+"&zoom="+zoom);
+      const data=result.data||{};
+      const records=Array.isArray(data)?data:(data.clusters||data.data||[]);
+      const count=Array.isArray(records)?records.length:(Number(data.count)||0);
+      $("visualStatus").textContent="Windy Webcams API responded successfully. "+(count?count+" coverage cluster record(s) returned for this map view.":"The provider returned no cluster records for this map view.")+" Zoom into a region and reload to query local coverage. A camera listing does not guarantee a live stream.";
+      $("advancedStatus").innerHTML='<div class="card"><b>Windy Webcams API v3</b><div class="source statuspill"><i class="dot"></i> API RESPONSE RECEIVED</div><div class="metric"><span>Coverage records</span><b>'+esc(count)+'</b></div><div class="source">Retrieved '+esc(new Date(result.retrieved_at*1000).toLocaleTimeString())+'</div><div class="source"><a href="https://api.windy.com/webcams/docs" target="_blank" rel="noopener">Provider documentation</a></div><div class="source">Individual playback and preview availability depends on each provider record.</div></div>';
+    }catch(e){
+      $("visualStatus").textContent="Camera data unavailable: "+e.message+". No placeholder feed is displayed.";
+      $("advancedStatus").innerHTML='<div class="card"><b>Windy Webcams API v3</b><div class="source bad">REQUEST FAILED</div><div class="source">'+esc(e.message)+'</div></div>';
+    }
   }
   function fly(lat,lon,height=1500000){state.viewer?.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lon,lat,height),duration:1.5});state.selected={lat,lon};}
   async function loadQuakes(){
@@ -312,7 +331,8 @@
       const [h,c]=await Promise.all([api("/api/health"),api("/api/capabilities")]);
       $("connectionText").textContent="API ONLINE · SOURCE ATTRIBUTION ACTIVE";
       $("sourceHealth").innerHTML=c.available.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="statuspill"><i class="dot"></i>'+esc(s.status.replace("_"," "))+'</b></div>').join("")+c.not_connected.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="warn">NOT CONNECTED</b></div>').join("");
-      $("advancedStatus").innerHTML=c.not_connected.map(s=>'<div class="card"><b>'+esc(s.name)+'</b><div class="source warn">NOT CONNECTED</div><div class="source">'+esc(s.note)+'</div></div>').join("");
+      $("advancedStatus").innerHTML=c.not_connected.map(s=>'<div class="card"><b>'+esc(s.name)+'</b><div class="source warn">NOT CONNECTED</div><div class="source">'+esc(s.note)+'</div></div>').join("")+c.available.filter(s=>s.id==="cameras").map(s=>'<div class="card"><b>'+esc(s.name)+'</b><div class="source statuspill"><i class="dot"></i> CONFIGURED</div><div class="source">'+esc(s.note)+'</div><button class="chip" id="loadCameraCoverage" style="margin-top:8px">Load camera coverage</button></div>').join("");
+      const cameraLoader=$("loadCameraCoverage");if(cameraLoader)cameraLoader.addEventListener("click",openCameraView);
     }catch(e){$("connectionText").textContent="API CONNECTION DEGRADED";$("sourceHealth").innerHTML='<div class="empty bad">'+esc(e.message)+'</div>';}
   }
   $("searchForm").addEventListener("submit",e=>{e.preventDefault();const q=$("searchInput").value.trim();if(q.length>1)search(q);});
