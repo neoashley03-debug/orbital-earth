@@ -280,7 +280,7 @@
   }
   async function openCameraView(){
     if(!state.viewer){$("visualStatus").textContent="Globe is not ready yet.";return;}
-    $("visualStatus").textContent="Requesting current camera coverage from Windy Webcams…";
+    $("visualStatus").textContent="Requesting current public webcam coverage from Windy…";
     const rect=state.viewer.camera.computeViewRectangle();
     const north=rect?Cesium.Math.toDegrees(rect.north):84;
     const south=rect?Cesium.Math.toDegrees(rect.south):-60;
@@ -290,12 +290,48 @@
     const zoom=Math.max(0,Math.min(18,Math.round(17-Math.log2(Math.max(height,1000)/1000))));
     try{
       const result=await api("/api/cameras?north_lat="+north+"&east_lon="+east+"&south_lat="+south+"&west_lon="+west+"&zoom="+zoom);
-      const data=result.data||{};
-      const records=Array.isArray(data)?data:(data.clusters||data.data||[]);
-      const count=Array.isArray(records)?records.length:(Number(data.count)||0);
-      $("visualStatus").textContent="Windy Webcams API responded successfully. "+(count?count+" coverage cluster record(s) returned for this map view.":"The provider returned no cluster records for this map view.")+" Zoom into a region and reload to query local coverage. A camera listing does not guarantee a live stream.";
-      $("advancedStatus").innerHTML='<div class="card"><b>Windy Webcams API v3</b><div class="source statuspill"><i class="dot"></i> API RESPONSE RECEIVED</div><div class="metric"><span>Coverage records</span><b>'+esc(count)+'</b></div><div class="source">Retrieved '+esc(new Date(result.retrieved_at*1000).toLocaleTimeString())+'</div><div class="source"><a href="https://api.windy.com/webcams/docs" target="_blank" rel="noopener">Provider documentation</a></div><div class="source">Individual playback and preview availability depends on each provider record.</div></div>';
+      const payload=result.data||{};
+      const records=Array.isArray(payload)?payload:(payload.webcams||payload.clusters||payload.data||[]);
+      if(!state.cameraLayer){
+        state.cameraLayer=new Cesium.CustomDataSource("Windy public webcam locations");
+        await state.viewer.dataSources.add(state.cameraLayer);
+      }
+      state.cameraLayer.entities.removeAll();
+      const valid=records.filter(w=>{
+        const p=w.location||w;
+        const lat=Number(p.latitude??w.latitude??w.lat);
+        const lon=Number(p.longitude??w.longitude??w.lon);
+        return Number.isFinite(lat)&&Number.isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180;
+      });
+      const cards=valid.slice(0,12).map((w,i)=>{
+        const p=w.location||w;
+        const lat=Number(p.latitude??w.latitude??w.lat);
+        const lon=Number(p.longitude??w.longitude??w.lon);
+        const title=w.title||w.name||("Public webcam "+(w.webcamId||w.id||i+1));
+        const image=w.images?.current?.icon||w.images?.current?.preview||"";
+        const detail=w.urls?.detail||"";
+        const live=!!w.player?.live;
+        const cluster=Number(w.clusterSize||1);
+        const description="<b>"+esc(title)+"</b><br>"+esc([p.city,p.region,p.country].filter(Boolean).join(", ")||"Location supplied by provider")+"<br>"+(live?"Provider live-player link available":"No live-player link supplied")+"<br>Provider: Windy Webcams";
+        state.cameraLayer.entities.add({
+          position:Cesium.Cartesian3.fromDegrees(lon,lat),
+          point:{pixelSize:10,color:Cesium.Color.CYAN,outlineColor:Cesium.Color.BLACK,outlineWidth:2},
+          name:title,
+          description:description
+        });
+        return '<div class="card">'+(image?'<img src="'+esc(image)+'" alt="'+esc(title)+' preview" loading="lazy" style="width:100%;max-height:130px;object-fit:cover;border-radius:8px;margin:6px 0">':'')+
+          '<b>'+esc(title)+'</b><div class="source">'+esc([p.city,p.region,p.country].filter(Boolean).join(", ")||"Provider location")+'</div>'+
+          '<div class="metric"><span>Coordinates</span><b>'+lat.toFixed(4)+', '+lon.toFixed(4)+'</b></div>'+
+          '<div class="source">'+(live?'<span class="statuspill">LIVE PLAYER LINK</span>':'<span class="warn">NO LIVE PLAYER LINK</span>')+
+          (cluster>1?' · Cluster contains '+esc(cluster)+' webcams':'')+'</div>'+
+          (detail?'<div class="source"><a href="'+esc(detail)+'" target="_blank" rel="noopener">Open provider webcam page</a></div>':'')+
+          '</div>';
+      }).join("");
+      $("visualStatus").textContent="Windy Webcams returned "+records.length+" record(s); "+valid.length+" have usable coordinates. These are public webcams, not verified road CCTV. Preview images may be delayed or time-limited.";
+      $("advancedStatus").innerHTML='<div class="card"><b>Windy Webcams API v3</b><div class="source statuspill">LIVE API RESPONSE</div><div class="metric"><span>Returned records</span><b>'+esc(records.length)+'</b></div><div class="metric"><span>Mapped locations</span><b>'+esc(valid.length)+'</b></div><div class="source">Retrieved '+esc(new Date(result.retrieved_at*1000).toLocaleTimeString())+' · <a href="https://api.windy.com/webcams/docs" target="_blank" rel="noopener">Provider documentation</a></div><div class="source">Select a cyan marker on the globe for its location details. Public webcam imagery is not guaranteed to be a live video stream.</div></div>'+
+        (cards||'<div class="card">The provider returned no webcam records with usable coordinates for this view. Zoom out or move to another region.</div>');
     }catch(e){
+      if(state.cameraLayer)state.cameraLayer.entities.removeAll();
       $("visualStatus").textContent="Camera data unavailable: "+e.message+". No placeholder feed is displayed.";
       $("advancedStatus").innerHTML='<div class="card"><b>Windy Webcams API v3</b><div class="source bad">REQUEST FAILED</div><div class="source">'+esc(e.message)+'</div></div>';
     }
