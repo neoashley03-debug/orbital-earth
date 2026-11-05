@@ -207,7 +207,6 @@
     if(!ionToken){
       $("terrainButton").textContent="⛰ Terrain: needs key";
       $("visualStatus").textContent="3D mountain terrain needs a restricted Cesium ion access token. No token is configured, so the app will not pretend the ellipsoid is real terrain.";
-      $("terrainToggle");
       return;
     }
     try{
@@ -326,7 +325,8 @@
   document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));
   document.querySelectorAll("[data-scene]").forEach(b=>b.addEventListener("click",()=>{
     if(!state.viewer)return;
-    state.viewer.scene.mode=b.dataset.scene==="2d"?Cesium.SceneMode.SCENE2D:Cesium.SceneMode.SCENE3D;
+    if(b.dataset.scene==="2d")state.viewer.scene.morphTo2D(1);
+    else state.viewer.scene.morphTo3D(1);
     document.querySelectorAll("[data-scene]").forEach(x=>x.classList.toggle("active",x===b));
   }));
   $("terrainButton").addEventListener("click",()=>setTerrain(!terrainEnabled));
