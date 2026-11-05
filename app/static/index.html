@@ -15,7 +15,7 @@
 <style>
 :root{color-scheme:dark;--bg:#07111d;--panel:rgba(9,20,33,.94);--panel2:#0e1c2b;--line:#203448;--text:#e8f1fa;--muted:#8ca2b8;--cyan:#54d8e8;--green:#54d6a0;--amber:#f4bd65;--red:#ff7272}
 *{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer;color:inherit}.app{height:100%;display:grid;grid-template-rows:62px 1fr;overflow:hidden}.top{display:flex;align-items:center;gap:18px;padding:0 18px;background:#091522;border-bottom:1px solid var(--line);z-index:5}.brand{display:flex;align-items:center;gap:10px;min-width:220px}.brandmark{width:34px;height:34px;border:1px solid #2b7185;border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:19px;box-shadow:0 0 20px #36b8d51f}.brand strong{letter-spacing:.14em;font-size:13px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.18em}.statusline{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px}.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 9px #54d6a0}.topright{margin-left:auto;display:flex;align-items:center;gap:12px}.utc{color:#b7c9d8;font-variant-numeric:tabular-nums;font-size:12px}.iconbtn,.toolbtn,.tabbtn{border:1px solid var(--line);background:#102133;border-radius:7px;padding:8px 11px}.iconbtn:hover,.toolbtn:hover,.tabbtn:hover{border-color:#39869a}.layout{display:grid;grid-template-columns:310px minmax(0,1fr) 300px;min-height:0}.left,.right{background:var(--panel);overflow:auto;z-index:3}.left{border-right:1px solid var(--line)}.right{border-left:1px solid var(--line)}.section{padding:15px;border-bottom:1px solid var(--line)}.eyebrow{font-size:10px;color:var(--cyan);letter-spacing:.17em;text-transform:uppercase;margin-bottom:10px}.section h2{font-size:13px;letter-spacing:.04em;margin:0 0 12px}.muted{color:var(--muted)}.searchrow{display:flex;gap:6px}.searchrow input{min-width:0;flex:1;background:#081522;border:1px solid var(--line);border-radius:7px;padding:10px;color:var(--text);outline:none}.searchrow input:focus{border-color:var(--cyan)}.searchrow button,.primary{background:#124454;border:1px solid #28788a;border-radius:7px;padding:9px 11px;color:#d9fbff}.quick{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chip{border:1px solid var(--line);background:#0c1b2a;border-radius:20px;padding:6px 9px;font-size:11px;color:#c4d5e2}.chip.active{border-color:#3b9bab;color:var(--cyan);background:#10303b}.layer{display:flex;align-items:center;gap:9px;padding:8px 0;color:#d5e2ed;font-size:12px}.layer input{accent-color:#45c7d9}.layer small{margin-left:auto;color:var(--muted);font-size:10px}.mapwrap{position:relative;min-width:0;min-height:0;background:#06101b}.map{position:absolute;inset:0}.mapoverlay{position:absolute;z-index:2;pointer-events:none}.mapoverlay>*{pointer-events:auto}.maptop{top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:10px}.maplabel,.maptools{background:rgba(6,17,28,.85);border:1px solid #284055;border-radius:8px;padding:9px 12px;backdrop-filter:blur(12px)}.maplabel strong{font-size:11px;letter-spacing:.13em}.maplabel span{display:block;font-size:10px;color:var(--muted)}.maptools{display:flex;gap:6px}.maptools button{background:transparent;border:0;color:#d5e7f3;padding:3px 7px;font-size:11px}.crosshair{bottom:14px;left:14px;background:#06111dcc;border:1px solid #284055;border-radius:7px;padding:7px 10px;font-size:10px;color:#c3d5e2}.scale{bottom:14px;right:14px;background:#06111dcc;border:1px solid #284055;border-radius:7px;padding:7px 10px;font-size:10px;color:#c3d5e2}.card{background:#0b1a29;border:1px solid var(--line);border-radius:8px;padding:11px;margin-top:8px}.metric{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:5px 0;border-bottom:1px solid #1b2c3d}.metric:last-child{border:0}.metric b{font-weight:600;color:#edf7ff;text-align:right}.source{font-size:10px;color:var(--muted);margin-top:8px}.source a{color:var(--cyan);text-decoration:none}.event{border-left:2px solid #b98d4d;padding:7px 9px;margin:8px 0;background:#101f2e;border-radius:0 6px 6px 0}.event b{display:block;font-size:11px}.event span{font-size:10px;color:var(--muted)}.empty{font-size:11px;color:var(--muted);padding:10px 0}.statuspill{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:#a9c2d4;background:#102335;border:1px solid #294458;border-radius:20px;padding:4px 8px}.statuspill .dot{width:6px;height:6px}.warn{color:var(--amber)}.bad{color:var(--red)}.footer{font-size:10px;color:#71879b;line-height:1.5}.mobilebar{display:none}
-#cesiumContainer .cesium-viewer-bottom{display:none}#cesiumContainer .cesium-widget-credits{display:none}
+#cesiumContainer .cesium-viewer-bottom{display:block;left:auto;right:8px;bottom:42px}#cesiumContainer .cesium-widget-credits{display:block;font-size:9px;opacity:.85}
 @media(max-width:1050px){.layout{grid-template-columns:270px minmax(0,1fr)}.right{display:none}}
 @media(max-width:700px){.app{grid-template-rows:56px 1fr}.top{padding:0 11px}.brand{min-width:0}.brand small,.statusline{display:none}.topright{gap:6px}.utc{font-size:10px}.layout{display:block;position:relative}.mapwrap{position:absolute;inset:0}.left{position:absolute;z-index:4;left:0;top:0;bottom:0;width:min(86vw,320px);transform:translateX(-102%);transition:transform .2s ease;box-shadow:12px 0 40px #0008}.left.open{transform:translateX(0)}.right{display:none}.mobilebar{display:flex;position:absolute;z-index:3;top:12px;left:12px}.maptop{left:60px}.maplabel{display:none}.maptools{margin-left:auto}.maptools button{padding:5px}.crosshair{bottom:12px;left:12px}.scale{bottom:12px;right:12px}}
 </style>
@@ -58,7 +58,7 @@
 </aside>
 <section class="mapwrap">
   <div id="cesiumContainer" class="map" aria-label="Interactive 3D Earth globe"></div>
-  <div class="mapoverlay maptop"><div class="maplabel"><strong>EARTH / GLOBAL VIEW</strong><span>Geospatial operating picture</span></div><div class="maptools"><button id="zoomIn">＋</button><button id="zoomOut">−</button><button id="locateBtn">⌖ LOCATE</button><button id="refreshBtn">↻ REFRESH</button></div></div>
+  <div class="mapoverlay maptop"><div class="maplabel"><strong>EARTH / GLOBAL VIEW</strong><span id="basemapStatus">BASEMAP: INITIALIZING</span></div><div class="maptools"><button id="zoomIn">＋</button><button id="zoomOut">−</button><button id="locateBtn">⌖ LOCATE</button><button id="refreshBtn">↻ REFRESH</button></div></div>
   <div class="mapoverlay crosshair" id="cursorReadout">LAT -- / LON --</div><div class="mapoverlay scale">WGS84 · 3D GLOBE</div>
 </section>
 <aside class="right">
@@ -79,37 +79,54 @@
   function tick(){ $("clock").textContent = "UTC " + new Date().toISOString().slice(11,19); }
   setInterval(tick,1000); tick();
 
-  function initGlobe(){
+  async function initGlobe(){
     if (!window.Cesium) { $("connectionText").textContent="GLOBE LIBRARY UNAVAILABLE"; return; }
-    const imagery = new Cesium.UrlTemplateImageryProvider({
-      url:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      credit:"Esri World Imagery"
+    // Start with a dependable public street basemap so the globe is never
+    // left as an empty ellipsoid while satellite imagery is loading.
+    const fallback = new Cesium.OpenStreetMapImageryProvider({
+      url: "https://tile.openstreetmap.org/",
+      credit: "© OpenStreetMap contributors"
     });
     state.viewer = new Cesium.Viewer("cesiumContainer", {
-      imageryProvider: imagery,
+      imageryProvider: fallback,
       terrainProvider: new Cesium.EllipsoidTerrainProvider(),
       animation:false, timeline:false, baseLayerPicker:false, geocoder:false,
       homeButton:false, sceneModePicker:false, navigationHelpButton:false,
       infoBox:false, selectionIndicator:false, fullscreenButton:false,
-      requestRenderMode:true, maximumRenderTimeChange:1
+      requestRenderMode:false
     });
     const v=state.viewer;
     v.scene.globe.enableLighting=true;
+    v.scene.globe.baseColor=Cesium.Color.fromCssColorString("#172b3a");
     v.scene.backgroundColor=Cesium.Color.fromCssColorString("#06101b");
     v.camera.setView({destination:Cesium.Cartesian3.fromDegrees(20,10,23500000)});
+    $("basemapStatus").textContent="BASEMAP: OPENSTREETMAP";
+    // Upgrade to Esri World Imagery when the imagery service responds.
+    try {
+      const satellite = await Cesium.ArcGisMapServerImageryProvider.fromUrl(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
+      );
+      v.imageryLayers.removeAll(true);
+      v.imageryLayers.addImageryProvider(satellite);
+      $("basemapStatus").textContent="BASEMAP: ESRI WORLD IMAGERY";
+    } catch (err) {
+      console.warn("Satellite imagery unavailable; retaining OSM basemap.", err);
+      $("basemapStatus").textContent="BASEMAP: OSM FALLBACK · SATELLITE UNAVAILABLE";
+    }
+    v.scene.requestRender();
     v.screenSpaceEventHandler.setInputAction(evt=>{
       const p=v.camera.pickEllipsoid(evt.position,v.scene.globe.ellipsoid);
       if(!p)return;
-      const c=Cesium.Cartographic.fromCartesian(p);
-      const lat=Cesium.Math.toDegrees(c.latitude),lon=Cesium.Math.toDegrees(c.longitude);
+      const point=Cesium.Cartographic.fromCartesian(p);
+      const lat=Cesium.Math.toDegrees(point.latitude),lon=Cesium.Math.toDegrees(point.longitude);
       $("cursorReadout").textContent="LAT "+lat.toFixed(3)+" / LON "+lon.toFixed(3);
       inspectLocation(lat,lon);
     },Cesium.ScreenSpaceEventType.LEFT_CLICK);
     v.screenSpaceEventHandler.setInputAction(evt=>{
       const p=v.camera.pickEllipsoid(evt.endPosition,v.scene.globe.ellipsoid);
       if(!p)return;
-      const c=Cesium.Cartographic.fromCartesian(p);
-      $("cursorReadout").textContent="LAT "+Cesium.Math.toDegrees(c.latitude).toFixed(3)+" / LON "+Cesium.Math.toDegrees(c.longitude).toFixed(3);
+      const point=Cesium.Cartographic.fromCartesian(p);
+      $("cursorReadout").textContent="LAT "+Cesium.Math.toDegrees(point.latitude).toFixed(3)+" / LON "+Cesium.Math.toDegrees(point.longitude).toFixed(3);
     },Cesium.ScreenSpaceEventType.MOUSE_MOVE);
   }
   function fly(lat,lon,height=1500000){state.viewer?.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lon,lat,height),duration:1.5});state.selected={lat,lon};}
