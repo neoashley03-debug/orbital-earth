@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111d">
+<meta name="description" content="Orbital Earth — a source-attributed global geospatial intelligence platform.">
+<title>Orbital Earth | Global Intelligence</title>
+<link rel="manifest" href="/static/manifest.webmanifest">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://cesium.com">
+<link rel="preconnect" href="https://server.arcgisonline.com">
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.127/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.127/Build/Cesium/Cesium.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#07111d;--panel:rgba(9,20,33,.94);--panel2:#0e1c2b;--line:#203448;--text:#e8f1fa;--muted:#8ca2b8;--cyan:#54d8e8;--green:#54d6a0;--amber:#f4bd65;--red:#ff7272}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer;color:inherit}.app{height:100%;display:grid;grid-template-rows:62px 1fr;overflow:hidden}.top{display:flex;align-items:center;gap:18px;padding:0 18px;background:#091522;border-bottom:1px solid var(--line);z-index:5}.brand{display:flex;align-items:center;gap:10px;min-width:220px}.brandmark{width:34px;height:34px;border:1px solid #2b7185;border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:19px;box-shadow:0 0 20px #36b8d51f}.brand strong{letter-spacing:.14em;font-size:13px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.18em}.statusline{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px}.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 9px #54d6a0}.topright{margin-left:auto;display:flex;align-items:center;gap:12px}.utc{color:#b7c9d8;font-variant-numeric:tabular-nums;font-size:12px}.iconbtn,.toolbtn,.tabbtn{border:1px solid var(--line);background:#102133;border-radius:7px;padding:8px 11px}.iconbtn:hover,.toolbtn:hover,.tabbtn:hover{border-color:#39869a}.layout{display:grid;grid-template-columns:310px minmax(0,1fr) 300px;min-height:0}.left,.right{background:var(--panel);overflow:auto;z-index:3}.left{border-right:1px solid var(--line)}.right{border-left:1px solid var(--line)}.section{padding:15px;border-bottom:1px solid var(--line)}.eyebrow{font-size:10px;color:var(--cyan);letter-spacing:.17em;text-transform:uppercase;margin-bottom:10px}.section h2{font-size:13px;letter-spacing:.04em;margin:0 0 12px}.muted{color:var(--muted)}.searchrow{display:flex;gap:6px}.searchrow input{min-width:0;flex:1;background:#081522;border:1px solid var(--line);border-radius:7px;padding:10px;color:var(--text);outline:none}.searchrow input:focus{border-color:var(--cyan)}.searchrow button,.primary{background:#124454;border:1px solid #28788a;border-radius:7px;padding:9px 11px;color:#d9fbff}.quick{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chip{border:1px solid var(--line);background:#0c1b2a;border-radius:20px;padding:6px 9px;font-size:11px;color:#c4d5e2}.chip.active{border-color:#3b9bab;color:var(--cyan);background:#10303b}.layer{display:flex;align-items:center;gap:9px;padding:8px 0;color:#d5e2ed;font-size:12px}.layer input{accent-color:#45c7d9}.layer small{margin-left:auto;color:var(--muted);font-size:10px}.mapwrap{position:relative;min-width:0;min-height:0;background:#06101b}.map{position:absolute;inset:0}.mapoverlay{position:absolute;z-index:2;pointer-events:none}.mapoverlay>*{pointer-events:auto}.maptop{top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:10px}.maplabel,.maptools{background:rgba(6,17,28,.85);border:1px solid #284055;border-radius:8px;padding:9px 12px;backdrop-filter:blur(12px)}.maplabel strong{font-size:11px;letter-spacing:.13em}.maplabel span{display:block;font-size:10px;color:var(--muted)}.maptools{display:flex;gap:6px}.maptools button{background:transparent;border:0;color:#d5e7f3;padding:3px 7px;font-size:11px}.crosshair{bottom:14px;left:14px;background:#06111dcc;border:1px solid #284055;border-radius:7px;padding:7px 10px;font-size:10px;color:#c3d5e2}.scale{bottom:14px;right:14px;background:#06111dcc;border:1px solid #284055;border-radius:7px;padding:7px 10px;font-size:10px;color:#c3d5e2}.card{background:#0b1a29;border:1px solid var(--line);border-radius:8px;padding:11px;margin-top:8px}.metric{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:5px 0;border-bottom:1px solid #1b2c3d}.metric:last-child{border:0}.metric b{font-weight:600;color:#edf7ff;text-align:right}.source{font-size:10px;color:var(--muted);margin-top:8px}.source a{color:var(--cyan);text-decoration:none}.event{border-left:2px solid #b98d4d;padding:7px 9px;margin:8px 0;background:#101f2e;border-radius:0 6px 6px 0}.event b{display:block;font-size:11px}.event span{font-size:10px;color:var(--muted)}.empty{font-size:11px;color:var(--muted);padding:10px 0}.statuspill{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:#a9c2d4;background:#102335;border:1px solid #294458;border-radius:20px;padding:4px 8px}.statuspill .dot{width:6px;height:6px}.warn{color:var(--amber)}.bad{color:var(--red)}.footer{font-size:10px;color:#71879b;line-height:1.5}.mobilebar{display:none}
+#cesiumContainer .cesium-viewer-bottom{display:none}#cesiumContainer .cesium-widget-credits{display:none}
+@media(max-width:1050px){.layout{grid-template-columns:270px minmax(0,1fr)}.right{display:none}}
+@media(max-width:700px){.app{grid-template-rows:56px 1fr}.top{padding:0 11px}.brand{min-width:0}.brand small,.statusline{display:none}.topright{gap:6px}.utc{font-size:10px}.layout{display:block;position:relative}.mapwrap{position:absolute;inset:0}.left{position:absolute;z-index:4;left:0;top:0;bottom:0;width:min(86vw,320px);transform:translateX(-102%);transition:transform .2s ease;box-shadow:12px 0 40px #0008}.left.open{transform:translateX(0)}.right{display:none}.mobilebar{display:flex;position:absolute;z-index:3;top:12px;left:12px}.maptop{left:60px}.maplabel{display:none}.maptools{margin-left:auto}.maptools button{padding:5px}.crosshair{bottom:12px;left:12px}.scale{bottom:12px;right:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <button class="iconbtn mobilebar" id="menuBtn" aria-label="Open layers">☰</button>
+  <div class="brand"><div class="brandmark">◎</div><div><strong>ORBITAL EARTH</strong><small>GLOBAL INTELLIGENCE NETWORK</small></div></div>
+  <div class="statusline"><i class="dot"></i><span id="connectionText">CONNECTING TO DATA SERVICES</span></div>
+  <div class="topright"><span class="utc" id="clock">UTC --:--:--</span><button class="iconbtn" id="homeBtn" title="Reset globe">◎</button></div>
+</header>
+<main class="layout">
+<aside class="left" id="leftPanel">
+  <section class="section">
+    <div class="eyebrow">Navigation</div><h2>Find a location</h2>
+    <form class="searchrow" id="searchForm"><input id="searchInput" placeholder="City, landmark, coordinates…" autocomplete="off"><button class="primary">GO</button></form>
+    <div id="searchResults"></div>
+    <div class="quick"><button class="chip" data-view="africa">Africa</button><button class="chip" data-view="europe">Europe</button><button class="chip" data-view="asia">Asia</button><button class="chip" data-view="americas">Americas</button></div>
+  </section>
+  <section class="section">
+    <div class="eyebrow">Geospatial layers</div><h2>Map intelligence</h2>
+    <label class="layer"><input type="checkbox" id="earthquakesToggle" checked> Earthquakes <small>USGS</small></label>
+    <label class="layer"><input type="checkbox" id="placesToggle"> Nearby amenities <small>OSM</small></label>
+    <label class="layer"><input type="checkbox" id="weatherToggle"> Weather at centre <small>Open-Meteo</small></label>
+    <label class="layer"><input type="checkbox" id="airToggle"> Air quality at centre <small>Open-Meteo</small></label>
+  </section>
+  <section class="section">
+    <div class="eyebrow">Observation filters</div><h2>Earthquake activity</h2>
+    <div class="quick"><button class="chip active" data-days="1">24 hours</button><button class="chip" data-days="7">7 days</button><button class="chip" data-days="30">30 days</button></div>
+    <label class="layer">Minimum magnitude <small id="magValue">2.5+</small></label>
+    <input id="magSlider" type="range" min="0" max="6" step=".5" value="2.5" style="width:100%;accent-color:#54d8e8">
+    <div class="source">Earthquake observations refresh automatically. Map symbols are scaled by magnitude.</div>
+  </section>
+  <section class="section">
+    <div class="eyebrow">Connected services</div><h2>Data source health</h2>
+    <div id="sourceHealth" class="empty">Checking source availability…</div>
+  </section>
+  <section class="section footer">Orbital Earth does not claim continuous global camera coverage or real-time satellite tasking. Only connected and verifiable sources are shown. Basemap imagery may be older than the current date.</section>
+</aside>
+<section class="mapwrap">
+  <div id="cesiumContainer" class="map" aria-label="Interactive 3D Earth globe"></div>
+  <div class="mapoverlay maptop"><div class="maplabel"><strong>EARTH / GLOBAL VIEW</strong><span>Geospatial operating picture</span></div><div class="maptools"><button id="zoomIn">＋</button><button id="zoomOut">−</button><button id="locateBtn">⌖ LOCATE</button><button id="refreshBtn">↻ REFRESH</button></div></div>
+  <div class="mapoverlay crosshair" id="cursorReadout">LAT -- / LON --</div><div class="mapoverlay scale">WGS84 · 3D GLOBE</div>
+</section>
+<aside class="right">
+  <section class="section"><div class="eyebrow">Live overview</div><h2>Global situation</h2><div class="card"><div class="metric"><span>Earthquakes (current filter)</span><b id="quakeCount">—</b></div><div class="metric"><span>Largest magnitude</span><b id="maxMagnitude">—</b></div><div class="metric"><span>Last update</span><b id="lastUpdate">—</b></div></div></section>
+  <section class="section"><div class="eyebrow">Selected location</div><h2>Local intelligence</h2><div id="localIntel" class="empty">Click the globe or enable a local data layer to inspect a location.</div></section>
+  <section class="section"><div class="eyebrow">Verified observations</div><h2>Recent earthquakes</h2><div id="eventList" class="empty">Loading USGS observations…</div></section>
+  <section class="section"><div class="eyebrow">Integration status</div><h2>Advanced feeds</h2><div id="advancedStatus"></div></section>
+</aside>
+</main>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const state = { days: 1, minMag: 2.5, viewer: null, quakeLayer: null, placesLayer: null, selected: {lat: -25.746, lon: 28.188}, quakeData: [], loading: false };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const time = ms => ms ? new Date(ms).toLocaleString() : "—";
+  const api = async (path) => { const r = await fetch(path, {headers: {"Accept":"application/json"}}); if (!r.ok) { let d={}; try{d=await r.json()}catch{} throw new Error(d.detail || ("HTTP "+r.status)); } return r.json(); };
+  function tick(){ $("clock").textContent = "UTC " + new Date().toISOString().slice(11,19); }
+  setInterval(tick,1000); tick();
+
+  function initGlobe(){
+    if (!window.Cesium) { $("connectionText").textContent="GLOBE LIBRARY UNAVAILABLE"; return; }
+    const imagery = new Cesium.UrlTemplateImageryProvider({
+      url:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      credit:"Esri World Imagery"
+    });
+    state.viewer = new Cesium.Viewer("cesiumContainer", {
+      imageryProvider: imagery,
+      terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+      animation:false, timeline:false, baseLayerPicker:false, geocoder:false,
+      homeButton:false, sceneModePicker:false, navigationHelpButton:false,
+      infoBox:false, selectionIndicator:false, fullscreenButton:false,
+      requestRenderMode:true, maximumRenderTimeChange:1
+    });
+    const v=state.viewer;
+    v.scene.globe.enableLighting=true;
+    v.scene.backgroundColor=Cesium.Color.fromCssColorString("#06101b");
+    v.camera.setView({destination:Cesium.Cartesian3.fromDegrees(20,10,23500000)});
+    v.screenSpaceEventHandler.setInputAction(evt=>{
+      const p=v.camera.pickEllipsoid(evt.position,v.scene.globe.ellipsoid);
+      if(!p)return;
+      const c=Cesium.Cartographic.fromCartesian(p);
+      const lat=Cesium.Math.toDegrees(c.latitude),lon=Cesium.Math.toDegrees(c.longitude);
+      $("cursorReadout").textContent="LAT "+lat.toFixed(3)+" / LON "+lon.toFixed(3);
+      inspectLocation(lat,lon);
+    },Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    v.screenSpaceEventHandler.setInputAction(evt=>{
+      const p=v.camera.pickEllipsoid(evt.endPosition,v.scene.globe.ellipsoid);
+      if(!p)return;
+      const c=Cesium.Cartographic.fromCartesian(p);
+      $("cursorReadout").textContent="LAT "+Cesium.Math.toDegrees(c.latitude).toFixed(3)+" / LON "+Cesium.Math.toDegrees(c.longitude).toFixed(3);
+    },Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+  }
+  function fly(lat,lon,height=1500000){state.viewer?.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lon,lat,height),duration:1.5});state.selected={lat,lon};}
+  async function loadQuakes(){
+    if(state.loading)return; state.loading=true;
+    try{
+      const d=await api("/api/earthquakes?days="+state.days+"&min_magnitude="+state.minMag);
+      state.quakeData=d.features||[];
+      const layer=state.quakeLayer; layer.removeAll();
+      for(const q of state.quakeData){
+        const color=q.magnitude>=5?Cesium.Color.ORANGERED:q.magnitude>=4?Cesium.Color.ORANGE:Cesium.Color.YELLOW;
+        layer.add({position:Cesium.Cartesian3.fromDegrees(q.longitude,q.latitude),point:{pixelSize:Math.max(5,Math.min(18,5+(q.magnitude||0)*1.5)),color,outlineColor:Cesium.Color.BLACK,outlineWidth:1},description:
+          "<b>"+esc(q.place)+"</b><br>Magnitude: "+esc(q.magnitude)+"<br>Depth: "+esc(q.depth_km)+" km<br>"+esc(time(q.time))+"<br><a href='"+esc(q.url)+"' target='_blank' rel='noopener'>USGS event details</a>",
+          name:"M"+q.magnitude+" · "+(q.place||"Earthquake")});
+      }
+      $("quakeCount").textContent=d.count;
+      $("maxMagnitude").textContent=state.quakeData.length?Math.max(...state.quakeData.map(q=>q.magnitude||0)).toFixed(1):"—";
+      $("lastUpdate").textContent=new Date(d.retrieved_at*1000).toLocaleTimeString();
+      $("eventList").innerHTML=state.quakeData.slice(0,8).map(q=>'<div class="event"><b>M'+esc(q.magnitude)+' · '+esc(q.place)+'</b><span>'+esc(time(q.time))+' · '+esc(q.depth_km)+' km depth · <a target="_blank" rel="noopener" href="'+esc(q.url)+'">USGS</a></span></div>').join("")||'<div class="empty">No events match the current filter.</div>';
+    }catch(e){$("eventList").innerHTML='<div class="empty bad">USGS feed unavailable: '+esc(e.message)+'</div>';$("lastUpdate").textContent="Unavailable";}
+    finally{state.loading=false;}
+  }
+  async function inspectLocation(lat,lon){
+    state.selected={lat,lon};
+    $("localIntel").innerHTML='<div class="empty">Retrieving source-backed local observations…</div>';
+    const jobs=[];
+    if($("weatherToggle").checked)jobs.push(api("/api/weather?latitude="+lat+"&longitude="+lon).then(d=>({type:"weather",d})).catch(e=>({type:"error",name:"Weather",e})));
+    if($("airToggle").checked)jobs.push(api("/api/air-quality?latitude="+lat+"&longitude="+lon).then(d=>({type:"air",d})).catch(e=>({type:"error",name:"Air quality",e})));
+    if($("placesToggle").checked)jobs.push(api("/api/places?latitude="+lat+"&longitude="+lon).then(d=>({type:"places",d})).catch(e=>({type:"error",name:"Nearby places",e})));
+    if(!jobs.length){$("localIntel").innerHTML='<div class="empty">Select Weather, Air quality or Nearby amenities in the left panel, then click the globe.</div>';return;}
+    const results=await Promise.all(jobs);
+    let html='<div class="metric"><span>Coordinates</span><b>'+lat.toFixed(4)+', '+lon.toFixed(4)+'</b></div>';
+    for(const r of results){
+      if(r.type==="error"){html+='<div class="card"><b>'+esc(r.name)+'</b><div class="empty bad">'+esc(r.e.message)+'</div></div>';continue;}
+      const d=r.d.data||{};
+      if(r.type==="weather"){
+        const c=d.current||{};html+='<div class="card"><b>Weather · Open-Meteo</b><div class="metric"><span>Temperature</span><b>'+esc(c.temperature_2m)+' °C</b></div><div class="metric"><span>Feels like</span><b>'+esc(c.apparent_temperature)+' °C</b></div><div class="metric"><span>Wind</span><b>'+esc(c.wind_speed_10m)+' km/h</b></div><div class="source">Observation time: '+esc(c.time)+' · <a href="https://open-meteo.com/" target="_blank" rel="noopener">Source</a></div></div>';
+      }
+      if(r.type==="air"){
+        const c=d.current||{};html+='<div class="card"><b>Air quality · Open-Meteo</b><div class="metric"><span>US AQI</span><b>'+esc(c.us_aqi??"—")+'</b></div><div class="metric"><span>PM2.5</span><b>'+esc(c.pm2_5??"—")+' μg/m³</b></div><div class="metric"><span>PM10</span><b>'+esc(c.pm10??"—")+' μg/m³</b></div><div class="source">Observation time: '+esc(c.time)+' · <a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener">Source</a></div></div>';
+      }
+      if(r.type==="places"){
+        html+='<div class="card"><b>Nearby mapped amenities · OpenStreetMap</b><div class="metric"><span>Returned features</span><b>'+esc(r.d.count)+'</b></div>'+r.d.results.slice(0,8).map(p=>'<div class="metric"><span>'+esc(p.name)+'</span><b>'+esc(p.category)+'</b></div>').join("")+'<div class="source"><a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">Source</a></div></div>';
+        state.placesLayer.removeAll();for(const p of r.d.results){state.placesLayer.add({position:Cesium.Cartesian3.fromDegrees(p.longitude,p.latitude),point:{pixelSize:6,color:Cesium.Color.CYAN,outlineColor:Cesium.Color.BLACK,outlineWidth:1},name:p.name,description:esc(p.name)+" · "+esc(p.category)});}
+      }
+    }
+    $("localIntel").innerHTML=html;
+  }
+  async function search(q){
+    $("searchResults").innerHTML='<div class="empty">Searching OpenStreetMap…</div>';
+    try{const d=await api("/api/geocode?q="+encodeURIComponent(q));$("searchResults").innerHTML=d.results.map((r,i)=>'<button class="layer searchhit" data-index="'+i+'" style="width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid #1c3041"><span>'+esc(r.name)+'</span></button>').join("")||'<div class="empty">No matching locations.</div>';
+      document.querySelectorAll(".searchhit").forEach((b,i)=>b.addEventListener("click",()=>{const r=d.results[i];fly(r.latitude,r.longitude,900000);inspectLocation(r.latitude,r.longitude);$("searchResults").innerHTML="";}));
+    }catch(e){$("searchResults").innerHTML='<div class="empty bad">Search unavailable: '+esc(e.message)+'</div>';}
+  }
+  async function loadHealth(){
+    try{
+      const [h,c]=await Promise.all([api("/api/health"),api("/api/capabilities")]);
+      $("connectionText").textContent="API ONLINE · SOURCE ATTRIBUTION ACTIVE";
+      $("sourceHealth").innerHTML=c.available.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="statuspill"><i class="dot"></i>'+esc(s.status.replace("_"," "))+'</b></div>').join("")+c.not_connected.map(s=>'<div class="metric"><span>'+esc(s.name)+'</span><b class="warn">NOT CONNECTED</b></div>').join("");
+      $("advancedStatus").innerHTML=c.not_connected.map(s=>'<div class="card"><b>'+esc(s.name)+'</b><div class="source warn">NOT CONNECTED</div><div class="source">'+esc(s.note)+'</div></div>').join("");
+    }catch(e){$("connectionText").textContent="API CONNECTION DEGRADED";$("sourceHealth").innerHTML='<div class="empty bad">'+esc(e.message)+'</div>';}
+  }
+  $("searchForm").addEventListener("submit",e=>{e.preventDefault();const q=$("searchInput").value.trim();if(q.length>1)search(q);});
+  $("magSlider").addEventListener("input",e=>{$("magValue").textContent=e.target.value+"+";state.minMag=Number(e.target.value);loadQuakes();});
+  document.querySelectorAll("[data-days]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-days]").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.days=Number(b.dataset.days);loadQuakes();}));
+  document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{const views={africa:[20,0,18000000],europe:[15,52,10000000],asia:[100,30,18000000],americas:[-85,20,22000000]};fly(...views[b.dataset.view]);}));
+  $("homeBtn").addEventListener("click",()=>state.viewer?.camera.flyHome(1.4));
+  $("zoomIn").addEventListener("click",()=>state.viewer?.camera.zoomIn(800000));
+  $("zoomOut").addEventListener("click",()=>state.viewer?.camera.zoomOut(800000));
+  $("refreshBtn").addEventListener("click",()=>{loadQuakes();loadHealth();if($("weatherToggle").checked||$("airToggle").checked||$("placesToggle").checked)inspectLocation(state.selected.lat,state.selected.lon);});
+  $("locateBtn").addEventListener("click",()=>{if(!navigator.geolocation){$("localIntel").textContent="Location services are not supported by this browser.";return;}navigator.geolocation.getCurrentPosition(p=>{fly(p.coords.latitude,p.coords.longitude,500000);inspectLocation(p.coords.latitude,p.coords.longitude);},e=>{$("localIntel").textContent="Location unavailable: "+e.message;},{enableHighAccuracy:false,timeout:10000});});
+  ["weatherToggle","airToggle","placesToggle"].forEach(id=>$(id).addEventListener("change",()=>inspectLocation(state.selected.lat,state.selected.lon)));
+  $("earthquakesToggle").addEventListener("change",e=>{state.quakeLayer.show=e.target.checked;});
+  $("menuBtn").addEventListener("click",()=>$("leftPanel").classList.toggle("open"));
+  initGlobe();
+  if(state.viewer){state.quakeLayer=state.viewer.entities;state.placesLayer=new Cesium.EntityCollection();state.viewer.scene.primitives.add(new Cesium.PrimitiveCollection());}
+  // Separate collection for place markers, owned by the viewer.
+  if(state.viewer){state.placesLayer=state.viewer.entities;}
+  loadQuakes();loadHealth();
+  setInterval(loadQuakes,120000);
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("/static/sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>
