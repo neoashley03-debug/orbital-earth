@@ -83,9 +83,10 @@
     if (!window.Cesium) { $("connectionText").textContent="GLOBE LIBRARY UNAVAILABLE"; return; }
     // Start with a dependable public street basemap so the globe is never
     // left as an empty ellipsoid while satellite imagery is loading.
-    const fallback = new Cesium.OpenStreetMapImageryProvider({
-      url: "https://tile.openstreetmap.org/",
-      credit: "© OpenStreetMap contributors"
+    const fallback = new Cesium.UrlTemplateImageryProvider({
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      credit: "© OpenStreetMap contributors",
+      maximumLevel: 19
     });
     state.viewer = new Cesium.Viewer("cesiumContainer", {
       imageryProvider: fallback,
@@ -170,7 +171,7 @@
       }
       if(r.type==="places"){
         html+='<div class="card"><b>Nearby mapped amenities · OpenStreetMap</b><div class="metric"><span>Returned features</span><b>'+esc(r.d.count)+'</b></div>'+r.d.results.slice(0,8).map(p=>'<div class="metric"><span>'+esc(p.name)+'</span><b>'+esc(p.category)+'</b></div>').join("")+'<div class="source"><a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">Source</a></div></div>';
-        state.placesLayer.entities.removeAll();for(const p of r.d.results){state.placesLayer.add({position:Cesium.Cartesian3.fromDegrees(p.longitude,p.latitude),point:{pixelSize:6,color:Cesium.Color.CYAN,outlineColor:Cesium.Color.BLACK,outlineWidth:1},name:p.name,description:esc(p.name)+" · "+esc(p.category)});}
+        state.placesLayer.entities.removeAll();for(const p of r.d.results){state.placesLayer.entities.add({position:Cesium.Cartesian3.fromDegrees(p.longitude,p.latitude),point:{pixelSize:6,color:Cesium.Color.CYAN,outlineColor:Cesium.Color.BLACK,outlineWidth:1},name:p.name,description:esc(p.name)+" · "+esc(p.category)});}
       }
     }
     $("localIntel").innerHTML=html;
@@ -201,12 +202,24 @@
   ["weatherToggle","airToggle","placesToggle"].forEach(id=>$(id).addEventListener("change",()=>inspectLocation(state.selected.lat,state.selected.lon)));
   $("earthquakesToggle").addEventListener("change",e=>{state.quakeLayer.show=e.target.checked;});
   $("menuBtn").addEventListener("click",()=>$("leftPanel").classList.toggle("open"));
-  initGlobe();
-  if(state.viewer){state.quakeLayer=new Cesium.CustomDataSource("USGS earthquake observations");state.placesLayer=new Cesium.CustomDataSource("OpenStreetMap places");state.viewer.dataSources.add(state.quakeLayer);state.viewer.dataSources.add(state.placesLayer);}
-  // Separate collection for place markers, owned by the viewer.
-  
-  loadQuakes();loadHealth();
-  setInterval(loadQuakes,120000);
+  // Initialize the viewer and its data layers before any live feed can draw.
+  // This prevents a slow imagery-provider response from racing the data loaders.
+  initGlobe().then(async()=>{
+    state.quakeLayer=new Cesium.CustomDataSource("USGS earthquake observations");
+    state.placesLayer=new Cesium.CustomDataSource("OpenStreetMap places");
+    await state.viewer.dataSources.add(state.quakeLayer);
+    await state.viewer.dataSources.add(state.placesLayer);
+    state.viewer.scene.requestRender();
+    loadQuakes();
+    loadHealth();
+    setInterval(loadQuakes,120000);
+  }).catch(err=>{
+    console.error("Orbital Earth globe initialization failed:",err);
+    $("connectionText").textContent="GLOBE INITIALIZATION FAILED";
+    $("basemapStatus").textContent="GLOBE ERROR · CHECK CONNECTION";
+    $("eventList").innerHTML='<div class="empty bad">Globe initialization failed: '+esc(err.message||err)+'</div>';
+    loadHealth();
+  });
   if("serviceWorker" in navigator)navigator.serviceWorker.register("/static/sw.js").catch(()=>{});
 })();
 </script>
