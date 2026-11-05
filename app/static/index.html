@@ -118,7 +118,7 @@
     try{
       const d=await api("/api/earthquakes?days="+state.days+"&min_magnitude="+state.minMag);
       state.quakeData=d.features||[];
-      const layer=state.quakeLayer; layer.removeAll();
+      const layer=state.quakeLayer; layer.entities.removeAll();
       for(const q of state.quakeData){
         const color=q.magnitude>=5?Cesium.Color.ORANGERED:q.magnitude>=4?Cesium.Color.ORANGE:Cesium.Color.YELLOW;
         layer.add({position:Cesium.Cartesian3.fromDegrees(q.longitude,q.latitude),point:{pixelSize:Math.max(5,Math.min(18,5+(q.magnitude||0)*1.5)),color,outlineColor:Cesium.Color.BLACK,outlineWidth:1},description:
@@ -153,7 +153,7 @@
       }
       if(r.type==="places"){
         html+='<div class="card"><b>Nearby mapped amenities · OpenStreetMap</b><div class="metric"><span>Returned features</span><b>'+esc(r.d.count)+'</b></div>'+r.d.results.slice(0,8).map(p=>'<div class="metric"><span>'+esc(p.name)+'</span><b>'+esc(p.category)+'</b></div>').join("")+'<div class="source"><a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">Source</a></div></div>';
-        state.placesLayer.removeAll();for(const p of r.d.results){state.placesLayer.add({position:Cesium.Cartesian3.fromDegrees(p.longitude,p.latitude),point:{pixelSize:6,color:Cesium.Color.CYAN,outlineColor:Cesium.Color.BLACK,outlineWidth:1},name:p.name,description:esc(p.name)+" · "+esc(p.category)});}
+        state.placesLayer.entities.removeAll();for(const p of r.d.results){state.placesLayer.add({position:Cesium.Cartesian3.fromDegrees(p.longitude,p.latitude),point:{pixelSize:6,color:Cesium.Color.CYAN,outlineColor:Cesium.Color.BLACK,outlineWidth:1},name:p.name,description:esc(p.name)+" · "+esc(p.category)});}
       }
     }
     $("localIntel").innerHTML=html;
